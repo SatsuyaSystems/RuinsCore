@@ -18,7 +18,9 @@ public enum JobType {
     WACHE("wache", "Wache"),
     BERATER("berater", "Berater"),
     SCHANKWIRT("schankwirt", "Schankwirt"),
-    VERZAUBERER("verzauberer", "Verzauberer");
+    VERZAUBERER("verzauberer", "Verzauberer"),
+    SENSENMANN("sensenmann", "Sensenmann"),
+    PRINZ_PRINZESSIN("prinz_prinzessin", "Prinz/Prinzessin");
 
     private final String id;
     private final String displayName;

@@ -156,6 +156,10 @@ public final class JobGuiService {
             icon = Material.CAULDRON;
         } else if (jobType == JobType.VERZAUBERER) {
             icon = Material.ENCHANTING_TABLE;
+        } else if (jobType == JobType.SENSENMANN) {
+            icon = Material.NETHERITE_HOE;
+        } else if (jobType == JobType.PRINZ_PRINZESSIN) {
+            icon = Material.TOTEM_OF_UNDYING;
         } else {
             icon = Material.BOOK;
         }

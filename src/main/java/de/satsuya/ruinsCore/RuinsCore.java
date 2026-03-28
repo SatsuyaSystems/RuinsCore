@@ -3,10 +3,8 @@ package de.satsuya.ruinsCore;
 import de.satsuya.ruinsCore.core.command.CommandManager;
 import de.satsuya.ruinsCore.core.database.DatabaseManager;
 import de.satsuya.ruinsCore.core.event.EventManager;
-import de.satsuya.ruinsCore.core.jobs.LeutnantHealthService;
-import de.satsuya.ruinsCore.core.jobs.RitterHealthService;
+import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
-import de.satsuya.ruinsCore.core.jobs.WacheHealthService;
 import de.satsuya.ruinsCore.core.wache.WacheRestrainManager;
 import de.satsuya.ruinsCore.core.module.ModuleManager;
 import de.satsuya.ruinsCore.core.module.impl.CommandModule;
@@ -26,9 +24,7 @@ public final class RuinsCore extends JavaPlugin {
     private CommandManager commandManager;
     private EventManager eventManager;
     private JobService jobService;
-    private LeutnantHealthService leutnantHealthService;
-    private RitterHealthService ritterHealthService;
-    private WacheHealthService wacheHealthService;
+    private JobHealthService jobHealthService;
     private WacheRestrainManager wacheRestrainManager;
     private ModuleManager moduleManager;
 
@@ -43,9 +39,7 @@ public final class RuinsCore extends JavaPlugin {
         this.commandManager = new CommandManager(this, loggerUtil);
         this.eventManager = new EventManager(this, loggerUtil);
         this.jobService = new JobService(databaseManager, loggerUtil);
-        this.leutnantHealthService = new LeutnantHealthService(jobService);
-        this.ritterHealthService = new RitterHealthService(jobService);
-        this.wacheHealthService = new WacheHealthService(jobService);
+        this.jobHealthService = new JobHealthService(jobService);
         this.wacheRestrainManager = new WacheRestrainManager();
         this.moduleManager = new ModuleManager(loggerUtil);
 
@@ -57,9 +51,7 @@ public final class RuinsCore extends JavaPlugin {
         moduleManager.registerModule(new EventModule(eventManager, listenerPackage));
 
         moduleManager.enableAll();
-        leutnantHealthService.syncAllOnline();
-        ritterHealthService.syncAllOnline();
-        wacheHealthService.syncAllOnline();
+        jobHealthService.syncAllOnline();
         loggerUtil.info("RuinsCore wurde erfolgreich gestartet.");
     }
 
@@ -102,16 +94,8 @@ public final class RuinsCore extends JavaPlugin {
         return jobService;
     }
 
-    public LeutnantHealthService getLeutnantHealthService() {
-        return leutnantHealthService;
-    }
-
-    public RitterHealthService getRitterHealthService() {
-        return ritterHealthService;
-    }
-
-    public WacheHealthService getWacheHealthService() {
-        return wacheHealthService;
+    public JobHealthService getJobHealthService() {
+        return jobHealthService;
     }
 
     public WacheRestrainManager getWacheRestrainManager() {

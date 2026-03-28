@@ -1,14 +1,11 @@
 package de.satsuya.ruinsCore.listeners;
 
 import de.satsuya.ruinsCore.RuinsCore;
+import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.jobs.JobType;
-import de.satsuya.ruinsCore.core.jobs.LeutnantHealthService;
-import de.satsuya.ruinsCore.core.jobs.RitterHealthService;
-import de.satsuya.ruinsCore.core.jobs.WacheHealthService;
 import de.satsuya.ruinsCore.core.jobs.gui.JobGuiService;
 import de.satsuya.ruinsCore.core.jobs.gui.JobMembersGuiHolder;
-import de.satsuya.ruinsCore.core.jobs.gui.JobOverviewGuiHolder;
 import de.satsuya.ruinsCore.core.jobs.gui.JobUserSelectGuiHolder;
 import de.satsuya.ruinsCore.core.jobs.gui.JobUserSelectMode;
 import de.satsuya.ruinsCore.core.permission.PermissionManager;
@@ -19,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -27,23 +25,20 @@ public final class JobGuiListener implements Listener {
     private final PermissionManager permissionManager;
     private final JobService jobService;
     private final JobGuiService jobGuiService;
-    private final LeutnantHealthService leutnantHealthService;
-    private final RitterHealthService ritterHealthService;
-    private final WacheHealthService wacheHealthService;
+    private final JobHealthService jobHealthService;
 
     public JobGuiListener(RuinsCore plugin) {
         this.permissionManager = plugin.getPermissionManager();
         this.jobService = plugin.getJobService();
         this.jobGuiService = new JobGuiService(plugin.getJobService());
-        this.leutnantHealthService = plugin.getLeutnantHealthService();
-        this.ritterHealthService = plugin.getRitterHealthService();
-        this.wacheHealthService = plugin.getWacheHealthService();
+        this.jobHealthService = plugin.getJobHealthService();
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
-        if (!(inventory.getHolder() instanceof JobOverviewGuiHolder)
+        boolean isOverview = event.getView().getTitle().equals("Jobs - Auswahl");
+        if (!isOverview
                 && !(inventory.getHolder() instanceof JobMembersGuiHolder)
                 && !(inventory.getHolder() instanceof JobUserSelectGuiHolder)) {
             return;
@@ -65,8 +60,8 @@ public final class JobGuiListener implements Listener {
             return;
         }
 
-        if (inventory.getHolder() instanceof JobOverviewGuiHolder overviewHolder) {
-            handleOverviewClick(player, overviewHolder, slot);
+        if (isOverview) {
+            handleOverviewClick(player, inventory, slot);
             return;
         }
 
@@ -80,8 +75,21 @@ public final class JobGuiListener implements Listener {
         }
     }
 
-    private void handleOverviewClick(Player player, JobOverviewGuiHolder holder, int slot) {
-        JobType selectedJob = holder.getJob(slot);
+    private void handleOverviewClick(Player player, Inventory inventory, int slot) {
+        ItemStack clicked = inventory.getItem(slot);
+        if (clicked == null || !clicked.hasItemMeta() || !clicked.getItemMeta().hasDisplayName()) {
+            return;
+        }
+
+        String displayName = clicked.getItemMeta().getDisplayName();
+        JobType selectedJob = null;
+        for (JobType jobType : JobType.values()) {
+            if (jobType.getDisplayName().equals(displayName)) {
+                selectedJob = jobType;
+                break;
+            }
+        }
+
         if (selectedJob == null) {
             return;
         }
@@ -143,9 +151,7 @@ public final class JobGuiListener implements Listener {
             return;
         }
 
-        leutnantHealthService.syncOnline(targetUuid);
-        ritterHealthService.syncOnline(targetUuid);
-        wacheHealthService.syncOnline(targetUuid);
+        jobHealthService.syncOnline(targetUuid);
 
         jobGuiService.openMembersControlGui(player, holder.getJobType());
 
