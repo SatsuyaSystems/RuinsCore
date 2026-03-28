@@ -136,6 +136,8 @@ public final class JobGuiService {
             icon = Material.BRICKS;
         } else if (jobType == JobType.FISCHER) {
             icon = Material.FISHING_ROD;
+        } else if (jobType == JobType.BAUER) {
+            icon = Material.WHEAT;
         } else {
             icon = Material.BOOK;
         }

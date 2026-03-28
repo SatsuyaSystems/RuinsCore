@@ -16,4 +16,9 @@ jobs:
     restrictions:
       paralysis-ticks: 80
       plank-drop-chance: 0.35
+  bauer:
+    restrictions:
+      deny-plant-message: "§cNur Bauer dürfen Nahrungspflanzen anbauen."
+      deny-harvest-message: "§cNur Bauer dürfen Nahrungspflanzen abbauen."
+      deny-craft-message: "§cNur Bauer dürfen Essen craften."
 

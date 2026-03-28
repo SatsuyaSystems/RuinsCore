@@ -90,7 +90,7 @@ public final class DatabaseManager {
 
     public void executeUpdate(String sql, Object... parameters) {
         if (!isConnected()) {
-            loggerUtil.warning("SQL Update uebersprungen, weil keine Verbindung aktiv ist.");
+            loggerUtil.warning("SQL Update übersprungen, weil keine Verbindung aktiv ist.");
             return;
         }
 
@@ -114,7 +114,7 @@ public final class DatabaseManager {
 
     public Connection getConnectionOrNull() {
         if (!isConnected()) {
-            loggerUtil.warning("Keine aktive SQLite-Verbindung verfuegbar.");
+            loggerUtil.warning("Keine aktive SQLite-Verbindung verfügbar.");
             return null;
         }
 

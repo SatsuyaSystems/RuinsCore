@@ -163,7 +163,7 @@ public final class JobCommand implements CoreCommand {
 
     private void handleGui(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Dieser Befehl ist nur fuer Spieler verfuegbar.");
+            sender.sendMessage("Dieser Befehl ist nur für Spieler verfügbar.");
             return;
         }
 
@@ -226,11 +226,11 @@ public final class JobCommand implements CoreCommand {
         }
 
         if (!jobService.addLeader(target.getUniqueId(), jobType.get())) {
-            sender.sendMessage("Leader konnte nicht hinzugefuegt werden.");
+            sender.sendMessage("Leader konnte nicht hinzugefügt werden.");
             return;
         }
 
-        sender.sendMessage(target.getName() + " ist nun Leader fuer " + jobType.get().getDisplayName() + ".");
+        sender.sendMessage(target.getName() + " ist nun Leader für " + jobType.get().getDisplayName() + ".");
     }
 
     private void handleLeaderRemove(CommandSender sender, String[] args) {
@@ -256,7 +256,7 @@ public final class JobCommand implements CoreCommand {
             return;
         }
 
-        sender.sendMessage(target.getName() + " ist kein Leader mehr fuer " + jobType.get().getDisplayName() + ".");
+        sender.sendMessage(target.getName() + " ist kein Leader mehr für " + jobType.get().getDisplayName() + ".");
     }
 
     private void handleLeaderList(CommandSender sender, String[] args) {

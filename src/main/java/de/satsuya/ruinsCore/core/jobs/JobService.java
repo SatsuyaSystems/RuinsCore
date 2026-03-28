@@ -135,7 +135,7 @@ public final class JobService {
             statement.executeUpdate();
             return true;
         } catch (SQLException exception) {
-            loggerUtil.severe("Leader konnte nicht hinzugefuegt werden.", exception);
+            loggerUtil.severe("Leader konnte nicht hinzugefügt werden.", exception);
             return false;
         }
     }

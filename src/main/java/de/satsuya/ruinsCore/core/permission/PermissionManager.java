@@ -23,7 +23,7 @@ public final class PermissionManager {
             return true;
         }
 
-        sender.sendMessage("§cDafuer hast du keine Berechtigung.");
+        sender.sendMessage("§cDafür hast du keine Berechtigung.");
         return false;
     }
 

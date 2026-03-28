@@ -8,7 +8,8 @@ public enum JobType {
     HOLZFAELLER("holzfaeller", "Holzfäller"),
     MINER("miner", "Miner"),
     BUILDER("builder", "Builder"),
-    FISCHER("fischer", "Fischer");
+    FISCHER("fischer", "Fischer"),
+    BAUER("bauer", "Bauer");
 
     private final String id;
     private final String displayName;
