@@ -2,6 +2,9 @@ package de.satsuya.ruinsCore.commands;
 
 import de.satsuya.ruinsCore.RuinsCore;
 import de.satsuya.ruinsCore.core.command.CoreCommand;
+import de.satsuya.ruinsCore.core.jobs.LeutnantHealthService;
+import de.satsuya.ruinsCore.core.jobs.RitterHealthService;
+import de.satsuya.ruinsCore.core.jobs.WacheHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.jobs.JobType;
 import de.satsuya.ruinsCore.core.jobs.gui.JobGuiService;
@@ -28,11 +31,17 @@ public final class JobCommand implements CoreCommand {
     private final PermissionManager permissionManager;
     private final JobService jobService;
     private final JobGuiService jobGuiService;
+    private final LeutnantHealthService leutnantHealthService;
+    private final RitterHealthService ritterHealthService;
+    private final WacheHealthService wacheHealthService;
 
     public JobCommand(RuinsCore plugin) {
         this.permissionManager = plugin.getPermissionManager();
         this.jobService = plugin.getJobService();
         this.jobGuiService = new JobGuiService(jobService);
+        this.leutnantHealthService = plugin.getLeutnantHealthService();
+        this.ritterHealthService = plugin.getRitterHealthService();
+        this.wacheHealthService = plugin.getWacheHealthService();
     }
 
     @Override
@@ -118,6 +127,10 @@ public final class JobCommand implements CoreCommand {
             return;
         }
 
+        leutnantHealthService.syncOnline(target.getUniqueId());
+        ritterHealthService.syncOnline(target.getUniqueId());
+        wacheHealthService.syncOnline(target.getUniqueId());
+
         sender.sendMessage(target.getName() + " hat jetzt den Job " + jobType.get().getDisplayName() + ".");
     }
 
@@ -137,6 +150,10 @@ public final class JobCommand implements CoreCommand {
             sender.sendMessage(target.getName() + " hatte keinen Job oder konnte nicht aktualisiert werden.");
             return;
         }
+
+        leutnantHealthService.syncOnline(target.getUniqueId());
+        ritterHealthService.syncOnline(target.getUniqueId());
+        wacheHealthService.syncOnline(target.getUniqueId());
 
         sender.sendMessage("Job von " + target.getName() + " wurde entfernt.");
     }

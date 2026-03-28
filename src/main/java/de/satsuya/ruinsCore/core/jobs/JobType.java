@@ -9,7 +9,16 @@ public enum JobType {
     MINER("miner", "Miner"),
     BUILDER("builder", "Builder"),
     FISCHER("fischer", "Fischer"),
-    BAUER("bauer", "Bauer");
+    BAUER("bauer", "Bauer"),
+    SCHMIED("schmied", "Schmied"),
+    LEUTNANT("leutnant", "Leutnant"),
+    RITTER("ritter", "Ritter"),
+    LEHRER("lehrer", "Lehrer"),
+    BANNERRIST("bannerrist", "Bannerrist"),
+    WACHE("wache", "Wache"),
+    BERATER("berater", "Berater"),
+    SCHANKWIRT("schankwirt", "Schankwirt"),
+    VERZAUBERER("verzauberer", "Verzauberer");
 
     private final String id;
     private final String displayName;

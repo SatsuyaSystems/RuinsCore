@@ -32,15 +32,15 @@ public final class JobGuiService {
 
     public void openJobOverviewGui(Player viewer, Collection<JobType> allowedJobs) {
         JobOverviewGuiHolder holder = new JobOverviewGuiHolder();
-        Inventory inventory = Bukkit.createInventory(holder, 27, "Jobs - Auswahl");
+        Inventory inventory = Bukkit.createInventory(holder, 54, "Jobs - Auswahl");
 
-        int slot = 10;
+        int slot = 0;
         for (JobType jobType : allowedJobs) {
             inventory.setItem(slot, createJobItem(jobType));
             holder.setJob(slot, jobType);
-            slot += 2;
+            slot++;
 
-            if (slot >= 26) {
+            if (slot >= 45) {
                 break;
             }
         }
@@ -79,7 +79,7 @@ public final class JobGuiService {
     public void openUserSelectGui(Player viewer, JobType jobType, JobUserSelectMode mode) {
         JobUserSelectGuiHolder holder = new JobUserSelectGuiHolder(jobType, mode);
         String title = mode == JobUserSelectMode.ADD
-                ? "Job: " + jobType.getDisplayName() + " - Hinzufuegen"
+                ? "Job: " + jobType.getDisplayName() + " - Hinzufügen"
                 : "Job: " + jobType.getDisplayName() + " - Entfernen";
         Inventory inventory = Bukkit.createInventory(holder, GUI_SIZE, title);
 
@@ -138,6 +138,24 @@ public final class JobGuiService {
             icon = Material.FISHING_ROD;
         } else if (jobType == JobType.BAUER) {
             icon = Material.WHEAT;
+        } else if (jobType == JobType.SCHMIED) {
+            icon = Material.ANVIL;
+        } else if (jobType == JobType.LEUTNANT) {
+            icon = Material.SHIELD;
+        } else if (jobType == JobType.RITTER) {
+            icon = Material.DIAMOND_SWORD;
+        } else if (jobType == JobType.LEHRER) {
+            icon = Material.STICK;
+        } else if (jobType == JobType.BANNERRIST) {
+            icon = Material.WHITE_BANNER;
+        } else if (jobType == JobType.WACHE) {
+            icon = Material.GOLDEN_HELMET;
+        } else if (jobType == JobType.BERATER) {
+            icon = Material.LECTERN;
+        } else if (jobType == JobType.SCHANKWIRT) {
+            icon = Material.CAULDRON;
+        } else if (jobType == JobType.VERZAUBERER) {
+            icon = Material.ENCHANTING_TABLE;
         } else {
             icon = Material.BOOK;
         }

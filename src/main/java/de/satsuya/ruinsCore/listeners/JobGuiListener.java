@@ -3,6 +3,9 @@ package de.satsuya.ruinsCore.listeners;
 import de.satsuya.ruinsCore.RuinsCore;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.jobs.JobType;
+import de.satsuya.ruinsCore.core.jobs.LeutnantHealthService;
+import de.satsuya.ruinsCore.core.jobs.RitterHealthService;
+import de.satsuya.ruinsCore.core.jobs.WacheHealthService;
 import de.satsuya.ruinsCore.core.jobs.gui.JobGuiService;
 import de.satsuya.ruinsCore.core.jobs.gui.JobMembersGuiHolder;
 import de.satsuya.ruinsCore.core.jobs.gui.JobOverviewGuiHolder;
@@ -24,11 +27,17 @@ public final class JobGuiListener implements Listener {
     private final PermissionManager permissionManager;
     private final JobService jobService;
     private final JobGuiService jobGuiService;
+    private final LeutnantHealthService leutnantHealthService;
+    private final RitterHealthService ritterHealthService;
+    private final WacheHealthService wacheHealthService;
 
     public JobGuiListener(RuinsCore plugin) {
         this.permissionManager = plugin.getPermissionManager();
         this.jobService = plugin.getJobService();
         this.jobGuiService = new JobGuiService(plugin.getJobService());
+        this.leutnantHealthService = plugin.getLeutnantHealthService();
+        this.ritterHealthService = plugin.getRitterHealthService();
+        this.wacheHealthService = plugin.getWacheHealthService();
     }
 
     @EventHandler
@@ -133,6 +142,10 @@ public final class JobGuiListener implements Listener {
             player.sendMessage("Aktion fehlgeschlagen.");
             return;
         }
+
+        leutnantHealthService.syncOnline(targetUuid);
+        ritterHealthService.syncOnline(targetUuid);
+        wacheHealthService.syncOnline(targetUuid);
 
         jobGuiService.openMembersControlGui(player, holder.getJobType());
 

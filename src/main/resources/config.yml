@@ -21,4 +21,35 @@ jobs:
       deny-plant-message: "§cNur Bauer dürfen Nahrungspflanzen anbauen."
       deny-harvest-message: "§cNur Bauer dürfen Nahrungspflanzen abbauen."
       deny-craft-message: "§cNur Bauer dürfen Essen craften."
+  schmied:
+    restrictions:
+      deny-craft-message: "§cNur Schmiede dürfen diese Rüstung oder Werkzeuge craften."
+      deny-upgrade-message: "§cNur Schmiede dürfen Netherite-Upgrades durchführen."
+      deny-repair-message: "§cNur Schmiede dürfen diese Rüstung oder Werkzeuge reparieren."
+  lehrer:
+    bonuses:
+      stick-damage-multiplier: 2.0
+  bannerrist:
+    restrictions:
+      deny-craft-message: "§cNur Bannerristen dürfen Banner craften."
+      deny-edit-message: "§cNur Bannerristen dürfen Banner bearbeiten."
+  wache:
+    bonuses:
+      extra-health: 8.0
+    messages:
+      search-title: "Durchsuchung"
+      target-searched: "§7Du wirst durchsucht von {wache}."
+      restrained-message: "§cDu bist jetzt festgehalten!"
+      released-message: "§aDu bist freigelassen."
+      wache-restrained: "§a{spieler} ist jetzt festgehalten."
+      wache-released: "§a{spieler} ist freigelassen."
+  berater:
+    announcement-prefix: "§e[§6ANKÜNDIGUNG§e] §r"
+  schankwirt:
+    restrictions:
+      deny-brewing-message: "§cNur Schankwirte dürfen den Braustand benutzen."
+  verzauberer:
+    restrictions:
+      deny-enchanting-table-message: "§cNur Verzauberer dürfen den Zaubertisch benutzen."
+      deny-anvil-message: "§cNur Verzauberer dürfen den Amboss benutzen."
 
