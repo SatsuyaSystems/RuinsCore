@@ -1,0 +1,19 @@
+# RuinsCore Standardkonfiguration
+# Diese Datei wird beim ersten Start nach plugins/RuinsCore/config.yml kopiert.
+
+database:
+  file: ruinscore.db
+
+loader:
+  command-package: de.satsuya.ruinsCore.commands
+  listener-package: de.satsuya.ruinsCore.listeners
+
+alerts:
+  prefix: "[StaffAlert]"
+
+jobs:
+  holzfaeller:
+    restrictions:
+      paralysis-ticks: 80
+      plank-drop-chance: 0.35
+

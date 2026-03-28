@@ -2,3 +2,23 @@ name: RuinsCore
 version: '1.0-SNAPSHOT'
 main: de.satsuya.ruinsCore.RuinsCore
 api-version: '1.21'
+
+permissions:
+  ruinscore.command.ping:
+    description: Erlaubt den /ping Command.
+    default: true
+  ruinscore.command.staffalert:
+    description: Erlaubt den /staffalert Command.
+    default: op
+  ruinscore.job.manage:
+    description: Erlaubt Jobzuweisungen und Joblisten.
+    default: op
+  ruinscore.job.gui:
+    description: Erlaubt das Job-Mitglieder-GUI.
+    default: op
+  ruinscore.staff.alert.send:
+    description: Erlaubt das Senden von Staff-Alerts.
+    default: op
+  ruinscore.staff.alert.receive:
+    description: Erlaubt den Empfang von Staff-Alerts.
+    default: op
