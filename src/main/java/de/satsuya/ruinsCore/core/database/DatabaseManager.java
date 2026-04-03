@@ -101,6 +101,18 @@ public final class DatabaseManager {
                     size REAL NOT NULL DEFAULT 1.0
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS auctions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    seller_uuid TEXT NOT NULL,
+                    seller_name TEXT NOT NULL,
+                    item_data TEXT NOT NULL,
+                    price REAL NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    expires_at INTEGER NOT NULL
+                )
+                """);
     }
 
     public boolean isConnected() {

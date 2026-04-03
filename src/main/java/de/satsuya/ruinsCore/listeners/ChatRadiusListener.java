@@ -5,6 +5,9 @@ import de.satsuya.ruinsCore.core.chat.ChatRadiusService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.jobs.JobType;
 import de.satsuya.ruinsCore.core.jobs.JobColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -30,6 +33,7 @@ public final class ChatRadiusListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player sender = event.getPlayer();
         String jobPrefix = getJobPrefix(sender.getUniqueId());
+        String message = event.getMessage();
 
         // Wenn Radius deaktiviert: normale Nachricht für alle
         if (!chatRadiusService.isEnabled()) {
@@ -43,18 +47,25 @@ public final class ChatRadiusListener implements Listener {
             return;
         }
 
+        // Cancele das Original-Event
+        event.setCancelled(true);
+
         // Filtere die Empfänger basierend auf Radius
         Set<Player> recipients = chatRadiusService.getReceipients(sender);
 
         // Sender sieht seine eigene Nachricht immer
         recipients.add(sender);
 
-        // Setze die neuen Empfänger
-        event.getRecipients().clear();
-        event.getRecipients().addAll(recipients);
+        // Erstelle formatierte Nachricht
+        Component formattedMessage = Component.text(
+            jobPrefix + " §7" + sender.getName() + "§7: §f" + message,
+            NamedTextColor.WHITE
+        );
 
-        // Formatiere mit Job-Prefix
-        event.setFormat(jobPrefix + " §7%1$s§7: §f%2$s");
+        // Sende Nachricht nur an zugelassene Spieler
+        for (Player recipient : recipients) {
+            recipient.sendMessage(formattedMessage);
+        }
     }
 
     /**

@@ -30,6 +30,7 @@ public enum PermissionNode {
     COMMAND_SIZE_OTHER("ruinscore.command.size.other"),
     JOB_MANAGE("ruinscore.job.manage"),
     JOB_GUI("ruinscore.job.gui"),
+    AUCTION_USE("ruinscore.auction.use"),
     STAFF_ALERTS_SEND("ruinscore.staff.alert.send"),
     STAFF_ALERTS_RECEIVE("ruinscore.staff.alert.receive");
 

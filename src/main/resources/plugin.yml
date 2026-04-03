@@ -91,6 +91,9 @@ permissions:
   ruinscore.job.gui:
     description: Erlaubt das Job-Mitglieder-GUI.
     default: op
+  ruinscore.auction.use:
+    description: Erlaubt den /auction Command.
+    default: true
   ruinscore.staff.alert.send:
     description: Erlaubt das Senden von Staff-Alerts.
     default: op

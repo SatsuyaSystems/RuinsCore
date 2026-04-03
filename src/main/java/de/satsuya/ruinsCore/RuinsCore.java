@@ -1,6 +1,8 @@
 package de.satsuya.ruinsCore;
 
 import de.satsuya.ruinsCore.core.command.CommandManager;
+import de.satsuya.ruinsCore.core.auction.AuctionService;
+import de.satsuya.ruinsCore.core.auction.gui.AuctionGuiService;
 import de.satsuya.ruinsCore.core.chat.ChatRadiusService;
 import de.satsuya.ruinsCore.core.database.DatabaseManager;
 import de.satsuya.ruinsCore.core.economy.EconomyService;
@@ -50,6 +52,8 @@ public final class RuinsCore extends JavaPlugin {
     private WarningService warningService;
     private SizeService sizeService;
     private ScoreboardService scoreboardService;
+    private AuctionService auctionService;
+    private AuctionGuiService auctionGuiService;
     private ModuleManager moduleManager;
 
     @Override
@@ -77,6 +81,8 @@ public final class RuinsCore extends JavaPlugin {
         this.warningService = new WarningService(databaseManager, loggerUtil);
         this.sizeService = new SizeService(databaseManager, loggerUtil);
         this.scoreboardService = new ScoreboardService(this, jobService, economyService);
+        this.auctionService = new AuctionService(databaseManager, loggerUtil);
+        this.auctionGuiService = new AuctionGuiService(auctionService);
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
@@ -208,5 +214,13 @@ public final class RuinsCore extends JavaPlugin {
 
     public JobPrefixService getJobPrefixService() {
         return jobPrefixService;
+    }
+
+    public AuctionService getAuctionService() {
+        return auctionService;
+    }
+
+    public AuctionGuiService getAuctionGuiService() {
+        return auctionGuiService;
     }
 }
