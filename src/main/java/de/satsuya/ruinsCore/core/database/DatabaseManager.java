@@ -65,6 +65,25 @@ public final class DatabaseManager {
                     PRIMARY KEY (job_type, player_uuid)
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_economy (
+                    player_uuid TEXT PRIMARY KEY,
+                    balance REAL NOT NULL DEFAULT 0.0,
+                    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS money_requests (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    requester_uuid TEXT NOT NULL,
+                    target_uuid TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'PENDING',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
     }
 
     public boolean isConnected() {

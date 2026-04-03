@@ -10,6 +10,51 @@ permissions:
   ruinscore.command.staffalert:
     description: Erlaubt den /staffalert Command.
     default: op
+  ruinscore.command.money:
+    description: Erlaubt den /money Command.
+    default: true
+  ruinscore.command.money.admin:
+    description: Erlaubt Admin-Features für /money (set, add, remove, info).
+    default: op
+  ruinscore.command.pay:
+    description: Erlaubt den /pay Command.
+    default: true
+  ruinscore.command.request:
+    description: Erlaubt die /request und /requests Commands.
+    default: true
+  ruinscore.command.sudo:
+    description: Erlaubt den /sudo Command.
+    default: op
+  ruinscore.command.gamemode:
+    description: Erlaubt den /gm Command.
+    default: op
+  ruinscore.command.fly:
+    description: Erlaubt den /fly Command.
+    default: op
+  ruinscore.command.speed:
+    description: Erlaubt den /speed Command.
+    default: op
+  ruinscore.command.flyspeed:
+    description: Erlaubt den /flyspeed Command.
+    default: op
+  ruinscore.command.resetallspeeds:
+    description: Erlaubt den /resetallspeeds Command.
+    default: op
+  ruinscore.command.vanish:
+    description: Erlaubt den /vanish Command.
+    default: op
+  ruinscore.command.fireball:
+    description: Erlaubt den /fireball Command.
+    default: op
+  ruinscore.command.smite:
+    description: Erlaubt den /smite Command.
+    default: op
+  ruinscore.command.msg:
+    description: Erlaubt den /msg Command für private Nachrichten.
+    default: true
+  ruinscore.command.msg.spy:
+    description: Erlaubt es, private Nachrichten anderer zu sehen.
+    default: op
   ruinscore.job.manage:
     description: Erlaubt Jobzuweisungen und Joblisten.
     default: op
