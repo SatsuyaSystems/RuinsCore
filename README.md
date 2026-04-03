@@ -86,6 +86,10 @@ Leader können das GUI ebenfalls nutzen, aber nur für ihre eigenen Jobs. Admins
 - `/freeze <Spieler>` (Admin) - Friere Spieler ein/auf
 - `/invsee <Spieler>` (Admin) - Schau Spieler-Inventar an (Live-Sync)
 - `/endersee <Spieler>` (Admin) - Schau Spieler-Ender-Chest an (Live-Sync)
+- `/warn <Spieler> <Grund...>` (Admin) - Verwarnt einen Spieler
+- `/warns <Spieler>` (Admin) - Zeige Verwarnungen eines Spielers
+- `/size <Größe>` - Ändere deine Spielergröße (0.6 - 1.1)
+- `/size <Spieler> <Größe>` (Admin) - Ändere Spielergröße
 - `/msg` (Spy - Admin) - Sehe private Nachrichten anderer
 
 ## Permissions
@@ -114,6 +118,11 @@ Aus `plugin.yml`:
 - `ruinscore.command.freeze` (freeze/unfreeze players)
 - `ruinscore.command.invsee` (view player inventories with live-sync)
 - `ruinscore.command.endersee` (view player ender chests with live-sync)
+- `ruinscore.chat.bypass` (see and send all chat messages without radius limit)
+- `ruinscore.command.warn` (warn players)
+- `ruinscore.command.warns` (view player warnings)
+- `ruinscore.command.size` (change own player size)
+- `ruinscore.command.size.other` (change other player sizes)
 - `ruinscore.job.manage`
 - `ruinscore.job.gui`
 - `ruinscore.staff.alert.send`
@@ -341,6 +350,128 @@ Das Endersee System erlaubt Admins, den Ender-Chest von Spielern anzuschauen mit
 - `EnderseeService` - Verwaltung offener Ender-Chests
 - `FreezeInvseeListener` - Live-Sync und Auto-Cleanup (auch für Endersee)
 - Command: `EnderseeCommand`
+
+## Chat-Radius System
+
+Das Chat-Radius System begrenzt sichtbare Chat-Nachrichten basierend auf Entfernung:
+
+### Features
+
+- **Radius-Limitierung**: Nur Spieler im konfigurierten Radius (Standard: 30 Blöcke) sehen Nachrichten
+- **Normale Nachrichten**: Chat-Format wird NICHT geändert
+- **Konfigurierbar**: Ein/Aus und Radius-Wert in der Config änderbar
+- **Bypass Permission**: Admins mit `ruinscore.chat.bypass` sehen alle Nachrichten
+- **Welt-Grenzen**: Spieler in anderen Welten sehen keine Nachrichten
+
+### Konfiguration (config.yml)
+
+```yaml
+chat:
+  enabled: true    # Chat-Radius aktivieren (true/false)
+  radius: 30       # Radius in Blöcken
+```
+
+### Beispiele
+
+- **Mit Radius (enabled: true)**:
+  - Spieler A schreibt in 5 Blöcken: Spieler B sieht es
+  - Spieler C in 35 Blöcken: Sieht die Nachricht nicht
+
+- **Ohne Radius (enabled: false)**:
+  - Alle Spieler sehen alle Nachrichten
+
+- **Mit Bypass Permission (ruinscore.chat.bypass)**:
+  - Admin sieht alle Nachrichten überall
+  - Admin kann überall schreiben, alle Spieler sehen es
+
+### Implementierung
+
+- `ChatRadiusService` - Radius-Logik
+- `ChatRadiusListener` - AsyncPlayerChatEvent Handler
+- Permission: `ruinscore.chat.bypass`
+
+## Warning System
+
+Das Warning System verwaltet Spieler-Verwarnungen mit automatischem Ban nach 5 Verwarnungen:
+
+### Features
+
+- **Verwarnungs-Tracking**: Jede Verwarnung wird gespeichert mit Admin-Name und Grund
+- **Automatischer Ban**: Nach 5 Verwarnungen wird der Spieler automatisch ge-kickt
+- **Verwarnungs-Info**: Zeige Verwarnungen mit verbleibenden Verwarnungen
+- **Datenbank-Persistenz**: Alle Verwarnungen werden in SQLite gespeichert
+
+### Commands
+
+#### `/warn <Spieler> <Grund...>`
+- Verwarnt einen Spieler
+- Speichert Grund und Admin-Name
+- Zeigt aktuelle Verwarnungsanzahl
+- **Automatisch Ban nach 5 Verwarnungen**
+- Beispiel: `/warn JibrilPlayer Spam`
+
+#### `/warns <Spieler>`
+- Zeigt Verwarnungsinfo eines Spielers
+- Zeigt aktuelle Verwarnungen/5
+- Zeigt verbleibende Verwarnungen
+- Beispiel: `/warns JibrilPlayer`
+
+### Ablauf
+
+1. Admin gibt `/warn Spieler Grund` ein
+2. Verwarn wird in Datenbank gespeichert
+3. Spieler sieht Nachricht mit aktuellen Verwarnungen
+4. Nach 5 Verwarnungen: **Spieler wird automatisch gekickt**
+5. Admin kann `/warns Spieler` checken
+
+### Beispiel-Ablauf
+
+- Verwarnung 1/5: `/warn Player Spam` → Player hat 1/5 (4 verbleibend)
+- Verwarnung 2/5: `/warn Player Beleidigung` → Player hat 2/5 (3 verbleibend)
+- ...
+- Verwarnung 5/5: `/warn Player Hack` → Player wird **automatisch gekickt**
+
+### Implementierung
+
+- `WarningService` - Verwaltung von Verwarnungen
+- Commands: `WarnCommand`, `WarnsCommand`
+- Datenbank-Tabelle: `player_warnings`
+
+## Size Command System
+
+Das Size Command System erlaubt Spielern, ihre Größe zu ändern (0.6 - 1.1):
+
+### Commands
+
+#### `/size <Größe>`
+- Ändere deine eigene Spielergröße
+- Größenbereich: 0.6 - 1.1
+- Beispiele:
+  - `/size 0.6` - Klein
+  - `/size 0.8` - Etwas kleiner
+  - `/size 1.0` - Normal
+  - `/size 1.1` - Groß
+- Require: `ruinscore.command.size`
+
+#### `/size <Spieler> <Größe>` (Admin)
+- Ändere die Größe eines anderen Spielers
+- Größenbereich: 0.6 - 1.1
+- Beispiel: `/size JibrilPlayer 0.6`
+- Require: `ruinscore.command.size.other`
+
+### Features
+
+✅ **Größenbereich:** 0.6 (klein) bis 1.1 (groß)
+✅ **Validierung:** Größe wird überprüft
+✅ **Tab-Completion:** Vordefinierte Größen
+✅ **Zwei Permissions:** Eine für sich selbst, eine für andere
+✅ **Benachrichtigungen:** Spieler wird informiert
+
+### Implementierung
+
+- Command: `SizeCommand`
+- Nutzt `player.setScale()`
+- Permissions: `ruinscore.command.size` und `ruinscore.command.size.other`
 
 ## Konfiguration
 

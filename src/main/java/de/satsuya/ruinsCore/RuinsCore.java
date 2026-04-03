@@ -1,6 +1,7 @@
 package de.satsuya.ruinsCore;
 
 import de.satsuya.ruinsCore.core.command.CommandManager;
+import de.satsuya.ruinsCore.core.chat.ChatRadiusService;
 import de.satsuya.ruinsCore.core.database.DatabaseManager;
 import de.satsuya.ruinsCore.core.economy.EconomyService;
 import de.satsuya.ruinsCore.core.economy.MoneyTransactionService;
@@ -10,9 +11,11 @@ import de.satsuya.ruinsCore.core.freeze.FreezeService;
 import de.satsuya.ruinsCore.core.invsee.InvseeService;
 import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
+import de.satsuya.ruinsCore.core.size.SizeService;
 import de.satsuya.ruinsCore.core.support.SupportModeService;
 import de.satsuya.ruinsCore.core.vanish.VanishService;
 import de.satsuya.ruinsCore.core.wache.WacheRestrainManager;
+import de.satsuya.ruinsCore.core.warning.WarningService;
 import de.satsuya.ruinsCore.core.module.ModuleManager;
 import de.satsuya.ruinsCore.core.module.impl.CommandModule;
 import de.satsuya.ruinsCore.core.module.impl.DatabaseModule;
@@ -40,6 +43,9 @@ public final class RuinsCore extends JavaPlugin {
     private FreezeService freezeService;
     private InvseeService invseeService;
     private EnderseeService enderseeService;
+    private ChatRadiusService chatRadiusService;
+    private WarningService warningService;
+    private SizeService sizeService;
     private ModuleManager moduleManager;
 
     @Override
@@ -62,6 +68,9 @@ public final class RuinsCore extends JavaPlugin {
         this.freezeService = new FreezeService();
         this.invseeService = new InvseeService();
         this.enderseeService = new EnderseeService();
+        this.chatRadiusService = new ChatRadiusService(this);
+        this.warningService = new WarningService(databaseManager, loggerUtil);
+        this.sizeService = new SizeService(databaseManager, loggerUtil);
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
@@ -169,5 +178,17 @@ public final class RuinsCore extends JavaPlugin {
 
     public EnderseeService getEnderseeService() {
         return enderseeService;
+    }
+
+    public ChatRadiusService getChatRadiusService() {
+        return chatRadiusService;
+    }
+
+    public WarningService getWarningService() {
+        return warningService;
+    }
+
+    public SizeService getSizeService() {
+        return sizeService;
     }
 }

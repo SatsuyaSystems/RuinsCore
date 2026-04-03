@@ -84,6 +84,23 @@ public final class DatabaseManager {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_warnings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    player_uuid TEXT NOT NULL,
+                    warned_by TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_sizes (
+                    player_uuid TEXT PRIMARY KEY,
+                    size REAL NOT NULL DEFAULT 1.0
+                )
+                """);
     }
 
     public boolean isConnected() {

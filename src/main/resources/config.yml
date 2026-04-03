@@ -8,6 +8,10 @@ loader:
   command-package: de.satsuya.ruinsCore.commands
   listener-package: de.satsuya.ruinsCore.listeners
 
+chat:
+  enabled: true
+  radius: 30
+
 alerts:
   prefix: "[StaffAlert]"
 

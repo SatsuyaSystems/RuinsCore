@@ -70,6 +70,21 @@ permissions:
   ruinscore.command.endersee:
     description: Erlaubt den /endersee Command.
     default: op
+  ruinscore.chat.bypass:
+    description: Erlaubt es, alle Chat-Nachrichten zu sehen und zu senden ohne Radius-Einschränkung.
+    default: op
+  ruinscore.command.warn:
+    description: Erlaubt den /warn Command.
+    default: op
+  ruinscore.command.warns:
+    description: Erlaubt den /warns Command.
+    default: op
+  ruinscore.command.size:
+    description: Erlaubt den /size Command für die eigene Größe.
+    default: true
+  ruinscore.command.size.other:
+    description: Erlaubt den /size Command für andere Spieler.
+    default: op
   ruinscore.job.manage:
     description: Erlaubt Jobzuweisungen und Joblisten.
     default: op
