@@ -4,9 +4,13 @@ import de.satsuya.ruinsCore.core.command.CommandManager;
 import de.satsuya.ruinsCore.core.database.DatabaseManager;
 import de.satsuya.ruinsCore.core.economy.EconomyService;
 import de.satsuya.ruinsCore.core.economy.MoneyTransactionService;
+import de.satsuya.ruinsCore.core.endersee.EnderseeService;
 import de.satsuya.ruinsCore.core.event.EventManager;
+import de.satsuya.ruinsCore.core.freeze.FreezeService;
+import de.satsuya.ruinsCore.core.invsee.InvseeService;
 import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
+import de.satsuya.ruinsCore.core.support.SupportModeService;
 import de.satsuya.ruinsCore.core.vanish.VanishService;
 import de.satsuya.ruinsCore.core.wache.WacheRestrainManager;
 import de.satsuya.ruinsCore.core.module.ModuleManager;
@@ -32,6 +36,10 @@ public final class RuinsCore extends JavaPlugin {
     private EconomyService economyService;
     private MoneyTransactionService moneyTransactionService;
     private VanishService vanishService;
+    private SupportModeService supportModeService;
+    private FreezeService freezeService;
+    private InvseeService invseeService;
+    private EnderseeService enderseeService;
     private ModuleManager moduleManager;
 
     @Override
@@ -50,6 +58,10 @@ public final class RuinsCore extends JavaPlugin {
         this.economyService = new EconomyService(databaseManager, loggerUtil, getServer());
         this.moneyTransactionService = new MoneyTransactionService(databaseManager, loggerUtil, economyService);
         this.vanishService = new VanishService(this);
+        this.supportModeService = new SupportModeService();
+        this.freezeService = new FreezeService();
+        this.invseeService = new InvseeService();
+        this.enderseeService = new EnderseeService();
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
@@ -66,6 +78,26 @@ public final class RuinsCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Cleanup: Entferne alle Support Modes
+        if (supportModeService != null) {
+            supportModeService.disableAllSupportModes();
+        }
+
+        // Cleanup: Taue alle gefrorenen Spieler auf
+        if (freezeService != null) {
+            freezeService.unfreezeAll();
+        }
+
+        // Cleanup: Schließe alle Invsee-Sessions
+        if (invseeService != null) {
+            invseeService.closeAllSessions();
+        }
+
+        // Cleanup: Schließe alle Endersee-Sessions
+        if (enderseeService != null) {
+            enderseeService.closeAllSessions();
+        }
+
         if (moduleManager != null) {
             moduleManager.disableAll();
         }
@@ -121,5 +153,21 @@ public final class RuinsCore extends JavaPlugin {
 
     public VanishService getVanishService() {
         return vanishService;
+    }
+
+    public SupportModeService getSupportModeService() {
+        return supportModeService;
+    }
+
+    public FreezeService getFreezeService() {
+        return freezeService;
+    }
+
+    public InvseeService getInvseeService() {
+        return invseeService;
+    }
+
+    public EnderseeService getEnderseeService() {
+        return enderseeService;
     }
 }

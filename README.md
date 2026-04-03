@@ -80,6 +80,12 @@ Leader können das GUI ebenfalls nutzen, aber nur für ihre eigenen Jobs. Admins
 - `/fireball [Geschwindigkeit]` (Admin) - Werfe einen Feuerball
 - `/smite <Spieler>` (Admin) - Schlage Spieler mit Blitz
 - `/msg <Spieler> <Nachricht...>` - Sende private Nachricht
+- `/supportmode` (Supporter) - Aktiviere Support Mode mit Godmode und Glow
+- `/bc chat <Nachricht...>` (Admin) - Sende Chat-Broadcast
+- `/bc display <Nachricht...>` (Admin) - Sende roten Title-Broadcast
+- `/freeze <Spieler>` (Admin) - Friere Spieler ein/auf
+- `/invsee <Spieler>` (Admin) - Schau Spieler-Inventar an (Live-Sync)
+- `/endersee <Spieler>` (Admin) - Schau Spieler-Ender-Chest an (Live-Sync)
 - `/msg` (Spy - Admin) - Sehe private Nachrichten anderer
 
 ## Permissions
@@ -103,6 +109,11 @@ Aus `plugin.yml`:
 - `ruinscore.command.smite` (strike players with lightning)
 - `ruinscore.command.msg` (send private messages)
 - `ruinscore.command.msg.spy` (see private messages of others)
+- `ruinscore.command.supportmode` (support mode with godmode and glow)
+- `ruinscore.command.broadcast` (broadcast messages to all players)
+- `ruinscore.command.freeze` (freeze/unfreeze players)
+- `ruinscore.command.invsee` (view player inventories with live-sync)
+- `ruinscore.command.endersee` (view player ender chests with live-sync)
 - `ruinscore.job.manage`
 - `ruinscore.job.gui`
 - `ruinscore.staff.alert.send`
@@ -205,6 +216,131 @@ Das Plugin implementiert beliebte Commands aus dem Essentials Plugin:
 - Beispiel: `/msg JibrilPlayer Hallo, wie geht's?`
 - Require: `ruinscore.command.msg`
 - Admin Spy: `ruinscore.command.msg.spy`
+
+## Support Mode System
+
+Das Support Mode System gibt Supportern spezielle Fähigkeiten zur Moderation:
+
+### `/supportmode`
+- Aktiviert/Deaktiviert Support Mode
+- **Features beim Aktivieren:**
+  - ✓ Godmode (Invulnerability + Resistance)
+  - ✓ Fly (Flug aktiviert)
+  - ✓ Glow-Effekt (weiß)
+  - ✓ Automatische Benachrichtigungen
+- **Deaktivierung:** Alle Effekte werden entfernt (nochmal `/supportmode` ausführen)
+- **Auto-Cleanup:** Beim Disconnect werden alle Effekte automatisch entfernt
+- Beispiel: `/supportmode` - Aktivieren/Deaktivieren
+- Require: `ruinscore.command.supportmode`
+
+### Features
+
+- **Godmode**: Spieler kann nicht getötet werden (Invulnerability + Resistance Effect)
+- **Fly**: Spieler kann frei fliegen
+- **Glow**: Spieler leuchtet weiß auf für bessere Sichtbarkeit
+- **State Restoration**: Ursprüngliche Zustände werden beim Deaktivieren wiederhergestellt
+- **Auto-Cleanup**: Alle Effects werden entfernt beim:
+  - Disconnect des Spielers
+  - Plugin Disable
+  - Manuelles Deaktivieren (erneut `/supportmode` ausführen)
+
+### Implementierung
+
+- `SupportModeService` - Zentrale Verwaltung von Support Modes
+- `SupportModeListener` - Cleanup bei Player Quit
+- Command: `SupportModeCommand`
+
+## Broadcast System
+
+Das Broadcast System erlaubt Admins, wichtige Nachrichten an alle Spieler zu senden:
+
+### `/bc chat <Nachricht...>`
+- Sendet eine Chat-Nachricht an alle Online-Spieler
+- Format: `[BROADCAST] Nachricht`
+- Gelb-formatiert für bessere Sichtbarkeit
+- Beispiel: `/bc chat Wartungsarbeiten in 5 Minuten!`
+- Require: `ruinscore.command.broadcast`
+
+### `/bc display <Nachricht...>`
+- Sendet eine rote Titel-Nachricht an alle Spieler
+- Nutzt den `/title` Command
+- Großformat auf dem Bildschirm
+- Rot gefärbt für Aufmerksamkeit
+- Beispiel: `/bc display Server wird neu gestartet!`
+- Require: `ruinscore.command.broadcast`
+
+### Implementierung
+
+- Command: `BroadcastCommand`
+- Zwei Modi: `chat` (Chat-Nachricht) und `display` (Title-Nachricht)
+
+## Freeze System
+
+Das Freeze System erlaubt Admins, Spieler einzufrieren (bewegungslos machen):
+
+### `/freeze <Spieler>`
+- Friere einen Spieler ein / Taue ihn auf (Toggle)
+- **Features beim Einfrieren:**
+  - ✓ Spieler kann sich nicht bewegen
+  - ✓ Slowness Level 255 (komplette Bewegungsblockierung)
+  - ✓ Jede Bewegung wird blockiert
+- **Automatische Benachrichtigung:** Spieler sieht Nachricht beim Einfrieren/Auftauen
+- Beispiel: `/freeze JibrilPlayer` - Einfrieren/Auftauen Toggle
+- Require: `ruinscore.command.freeze`
+
+### Implementierung
+
+- `FreezeService` - Verwaltung gefrorener Spieler
+- `FreezeInvseeListener` - Verhindert Bewegung gefrorener Spieler
+- Command: `FreezeCommand`
+
+## Invsee System
+
+Das Invsee System erlaubt Admins, das Inventar von Spielern anzuschauen mit Live-Sync:
+
+### `/invsee <Spieler>`
+- Öffne das Inventar eines anderen Spielers
+- **Features:**
+  - ✓ Live-Sync: Änderungen werden sofort synchronisiert
+  - ✓ Keine Duplikate: Bukkit handhabt Sync automatisch
+  - ✓ Geschlossenes Inventar wird tracked
+  - ✓ Auto-Cleanup beim Schließen
+- **Duplikat-Schutz:** 
+  - Bukkit synchronisiert Inventar-Änderungen automatisch
+  - Items werden nicht geduped
+  - Änderungen sind bidirektional
+- Beispiel: `/invsee JibrilPlayer` - Öffne sein Inventar
+- Require: `ruinscore.command.invsee`
+
+### Implementierung
+
+- `InvseeService` - Verwaltung offener Inventare
+- `FreezeInvseeListener` - Live-Sync und Auto-Cleanup
+- Command: `InvseeCommand`
+
+## Endersee System
+
+Das Endersee System erlaubt Admins, den Ender-Chest von Spielern anzuschauen mit Live-Sync:
+
+### `/endersee <Spieler>`
+- Öffne den Ender-Chest eines anderen Spielers
+- **Features:**
+  - ✓ Live-Sync: Änderungen werden sofort synchronisiert
+  - ✓ Keine Duplikate: Bukkit handhabt Sync automatisch
+  - ✓ Geschlossener Ender-Chest wird tracked
+  - ✓ Auto-Cleanup beim Schließen
+- **Duplikat-Schutz:** 
+  - Bukkit synchronisiert Ender-Chest Änderungen automatisch
+  - Items werden nicht geduped
+  - Änderungen sind bidirektional
+- Beispiel: `/endersee JibrilPlayer` - Öffne seinen Ender-Chest
+- Require: `ruinscore.command.endersee`
+
+### Implementierung
+
+- `EnderseeService` - Verwaltung offener Ender-Chests
+- `FreezeInvseeListener` - Live-Sync und Auto-Cleanup (auch für Endersee)
+- Command: `EnderseeCommand`
 
 ## Konfiguration
 

@@ -55,6 +55,21 @@ permissions:
   ruinscore.command.msg.spy:
     description: Erlaubt es, private Nachrichten anderer zu sehen.
     default: op
+  ruinscore.command.supportmode:
+    description: Erlaubt den /supportmode Command.
+    default: op
+  ruinscore.command.broadcast:
+    description: Erlaubt den /bc Broadcast Command.
+    default: op
+  ruinscore.command.freeze:
+    description: Erlaubt den /freeze Command.
+    default: op
+  ruinscore.command.invsee:
+    description: Erlaubt den /invsee Command.
+    default: op
+  ruinscore.command.endersee:
+    description: Erlaubt den /endersee Command.
+    default: op
   ruinscore.job.manage:
     description: Erlaubt Jobzuweisungen und Joblisten.
     default: op
