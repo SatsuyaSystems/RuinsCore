@@ -127,6 +127,7 @@ Aus `plugin.yml`:
 - `ruinscore.job.gui`
 - `ruinscore.staff.alert.send`
 - `ruinscore.staff.alert.receive`
+- `ruinscore.auction.use` (use auction system)
 
 ## Geldsystem
 
@@ -473,6 +474,133 @@ Das Size Command System erlaubt Spielern, ihre Größe zu ändern (0.6 - 1.1):
 - Nutzt `player.setScale()`
 - Permissions: `ruinscore.command.size` und `ruinscore.command.size.other`
 
+## Auktionssystem
+
+Das Auktionssystem erlaubt Spielern, Items zu verkaufen und zu kaufen:
+
+### Features
+
+- **Auktionen erstellen**: Spieler können Items mit Preis-GUI auktionieren
+- **Auktionen kaufen**: Spieler können Items von anderen Spielern kaufen
+- **Preis-GUI**: Intuitive GUI mit +1, +5, +10 und -1, -5, -10 Buttons
+- **Rückgabe von eigenen Items**: Spieler können ihre eigenen Auktionen zurückholen
+- **Geldsystem-Integration**: Automatischer Geldtransfer beim Kauf
+- **Datenbank-Persistenz**: Alle Auktionen werden gespeichert
+- **Gültigkeitsdauer**: Auktionen laufen 7 Tage (automatische Löschung abgelaufener Items)
+
+### Commands
+
+#### `/auction`
+- Öffne die Auktionsübersicht
+- Zeigt alle aktiven Auktionen auf mehreren Seiten
+- Klick auf Items zum Kaufen oder auf deine Auktionen zum Zurückholen
+- Require: `ruinscore.auction.use`
+
+### Workflow - Neue Auktion erstellen
+
+1. **Schritt 1**: Spieler gibt `/auction` ein
+2. **Schritt 2**: Klick auf "§a+ Neue Auktion"
+3. **Schritt 3**: Klick auf ein Item im Inventar des Spielers
+   - Item wird als Kopie auf die Glasscheibe "gezogen"
+4. **Schritt 4**: Klick auf "§a✓ Auktion erstellen"
+5. **Schritt 5**: Preis-GUI öffnet sich
+   - Aktuelle Preis-Anzeige: **Aktueller Preis: 0.00€**
+   - Minus-Buttons: **-10€**, **-5€**, **-1€** (rot/orange/gelb)
+   - Plus-Buttons: **+1€**, **+5€**, **+10€** (grün/dunkelgrün)
+   - Buttons: **✓ Auktion erstellen**, **✗ Abbrechen**
+6. **Schritt 6**: Spieler stellt Preis ein und klickt "✓ Auktion erstellen"
+   - **Original-Item wird aus Inventar entfernt**
+   - Auktion wird erstellt
+   - Spieler sieht Bestätigungsmeldung
+   - GUI schließt sich automatisch
+
+### Workflow - Item kaufen
+
+1. **Schritt 1**: Spieler gibt `/auction` ein
+2. **Schritt 2**: Sieht die Auktionsübersicht mit allen Items
+   - Jedes Item zeigt: **Verkäufer**, **Preis**
+3. **Schritt 3**: Spieler klickt auf ein fremdes Item
+   - **Geld wird abgezogen** (wenn vorhanden)
+   - **Geld wird zum Verkäufer addiert**
+   - **Item landet im Inventar**
+   - Auktion wird gelöscht
+   - Verkäufer wird benachrichtigt (wenn online)
+
+### Workflow - Eigene Auktion zurückbekommen
+
+1. **Schritt 1**: Spieler gibt `/auction` ein
+2. **Schritt 2**: Sieht die Auktionsübersicht
+3. **Schritt 3**: Spieler klickt auf sein **eigenes** Auktions-Item
+   - **Item wird sofort ins Inventar zurückgelegt**
+   - **Auktion wird gelöscht**
+   - Spieler sieht Bestätigungsmeldung: "§aAuktion beendet! X Item wurde zurück ins Inventar gelegt."
+
+### GUI-Layouts
+
+#### Preis-GUI (36 Slots)
+- **Slot 13**: Item-Vorschau (links, nicht anklickbar)
+- **Slots 2-7 (Reihe 1)**: Preis-Buttons
+  - Slot 2: **-10€** (Rot)
+  - Slot 3: **-5€** (Orange)
+  - Slot 4: **-1€** (Gelb)
+  - Slot 5: **+1€** (Lime)
+  - Slot 6: **+5€** (Grün)
+  - Slot 7: **+10€** (Dunkelgrün)
+- **Slot 31**: Preis-Display mit aktuellem Wert
+- **Slot 33**: ✓ Auktion erstellen (Bestätigung)
+- **Slot 34**: ✗ Abbrechen
+
+#### Item-Auswahl GUI (27 Slots)
+- **Slot 13**: Glasscheibe (Zielplatz) - nicht anklickbar
+- **Spieler-Inventar**: Klick auf Items zum Auswählen
+- **Slot 20**: ✗ Abbrechen
+- **Slot 24**: ✓ Auktion erstellen
+
+#### Auktionsübersicht (54 Slots)
+- **Slots 0-44**: Auktions-Items (max. 45 pro Seite)
+- **Slot 45**: ← Zurück (wenn nicht auf Seite 1)
+- **Slot 49**: + Neue Auktion
+- **Slot 53**: Weiter → (wenn nicht auf letzter Seite)
+- **Seiten-Navigation**: Automatisch berechnet
+
+### Implementierung
+
+- `AuctionService` - Core-Logik (erstellen, löschen, abrufen)
+- `AuctionGuiService` - GUI-Verwaltung (Übersicht, Erstellung, Preis)
+- `AuctionListener` - Event-Handler für GUI-Interaktionen
+- `AuctionCreateGuiHolder` - InventoryHolder für Item-Auswahl
+- `AuctionPriceGuiHolder` - InventoryHolder für Preis-GUI
+- `AuctionOverviewGuiHolder` - InventoryHolder für Auktionsübersicht
+- Command: `AuctionCommand`
+- Datenbank-Tabelle: `auctions`
+
+### Datenbank
+
+**Tabelle: `auctions`**
+- `id` - Eindeutige ID
+- `seller_uuid` - UUID des Verkäufers
+- `seller_name` - Name des Verkäufers
+- `item_data` - Serialisierte Item-Daten (Base64)
+- `price` - Auktionspreis
+- `created_at` - Erstellungszeitstempel
+- `expires_at` - Ablaufzeitstempel (7 Tage)
+
+### Validierungen
+
+✅ Spieler muss Geld haben zum Kaufen
+✅ Preis muss > 0€ sein
+✅ Item muss ausgewählt sein
+✅ Spieler kann eigene Items nicht kaufen (sondern nur zurückholen)
+✅ Abgelaufene Auktionen werden nicht mehr angezeigt
+✅ Maximale Item-Menge wird respektiert
+
+### Konfiguration
+
+Aktuell fest im Code:
+- **Auktionsgültigkeitsdauer**: 7 Tage
+- **Maximale Auktionen pro Seite**: 45 Items
+- **Preis-Buttons**: ±1€, ±5€, ±10€
+
 ## Konfiguration
 
 Datei: `src/main/resources/config.yml`
@@ -513,6 +641,8 @@ Beim Start werden automatisch erstellt:
 - `job_leaders` - Speichert Job-Leader
 - `player_economy` - Speichert das Guthaben jedes Spielers
 - `money_requests` - Speichert Geldanfragen (PENDING/ACCEPTED/DECLINED)
+- `player_warnings` - Speichert Verwarnungen pro Spieler
+- `auctions` - Speichert alle aktiven Auktionen
 
 ## Vanish System
 
