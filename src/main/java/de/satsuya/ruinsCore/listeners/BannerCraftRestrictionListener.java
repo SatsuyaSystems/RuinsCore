@@ -51,7 +51,7 @@ public final class BannerCraftRestrictionListener implements Listener {
             return;
         }
 
-        if (jobService.hasJob(player.getUniqueId(), JobType.BANNERRIST)) {
+        if (jobService.hasJob(player.getUniqueId(), JobType.BANNERRIST) || player.isOp()) {
             return;
         }
 

@@ -2,6 +2,7 @@ package de.satsuya.ruinsCore.listeners;
 
 import de.satsuya.ruinsCore.RuinsCore;
 import de.satsuya.ruinsCore.core.jobs.JobHealthService;
+import de.satsuya.ruinsCore.core.jobs.JobPrefixService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.jobs.JobType;
 import de.satsuya.ruinsCore.core.jobs.gui.JobGuiService;
@@ -10,6 +11,7 @@ import de.satsuya.ruinsCore.core.jobs.gui.JobUserSelectGuiHolder;
 import de.satsuya.ruinsCore.core.jobs.gui.JobUserSelectMode;
 import de.satsuya.ruinsCore.core.permission.PermissionManager;
 import de.satsuya.ruinsCore.core.permission.PermissionNode;
+import de.satsuya.ruinsCore.core.scoreboard.ScoreboardService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,12 +28,16 @@ public final class JobGuiListener implements Listener {
     private final JobService jobService;
     private final JobGuiService jobGuiService;
     private final JobHealthService jobHealthService;
+    private final JobPrefixService jobPrefixService;
+    private final ScoreboardService scoreboardService;
 
     public JobGuiListener(RuinsCore plugin) {
         this.permissionManager = plugin.getPermissionManager();
         this.jobService = plugin.getJobService();
         this.jobGuiService = new JobGuiService(plugin.getJobService());
         this.jobHealthService = plugin.getJobHealthService();
+        this.jobPrefixService = plugin.getJobPrefixService();
+        this.scoreboardService = plugin.getScoreboardService();
     }
 
     @EventHandler
@@ -153,14 +159,30 @@ public final class JobGuiListener implements Listener {
 
         jobHealthService.syncOnline(targetUuid);
 
-        jobGuiService.openMembersControlGui(player, holder.getJobType());
-
+        // Aktualisiere alle Anzeigen für den Ziel-Spieler
         Player target = Bukkit.getPlayer(targetUuid);
         if (target != null) {
+            // Aktualisiere Job-Prefix (Nameplate, Tab-Name)
+            jobPrefixService.updatePlayerPrefix(target);
+            
+            // Aktualisiere Scoreboard
+            org.bukkit.scoreboard.Scoreboard scoreboard = target.getScoreboard();
+            if (scoreboard != null) {
+                org.bukkit.scoreboard.Objective objective = scoreboard.getObjective("ruinscore_main");
+                if (objective != null) {
+                    scoreboardService.updateScoreboard(target, objective);
+                }
+            }
+            
+            // Aktualisiere Tablist
+            scoreboardService.updateTablist(target);
+            
             player.sendMessage("Mitglied aktualisiert: " + target.getName());
         } else {
             player.sendMessage("Mitglied aktualisiert.");
         }
+
+        jobGuiService.openMembersControlGui(player, holder.getJobType());
     }
 
     private boolean canManageJob(Player player, JobType jobType) {

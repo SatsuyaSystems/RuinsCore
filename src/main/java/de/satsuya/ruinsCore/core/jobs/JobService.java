@@ -84,6 +84,17 @@ public final class JobService {
         }
     }
 
+    /**
+     * Gibt den Job-Namen eines Spielers als String zurück
+     */
+    public String getPlayerJob(UUID playerUuid) {
+        Optional<JobType> job = getJob(playerUuid);
+        if (job.isPresent()) {
+            return job.get().getDisplayName();
+        }
+        return "Arbeitslos";
+    }
+
     public List<OfflinePlayer> getMembers(JobType jobType) {
         Connection connection = databaseManager.getConnectionOrNull();
         List<OfflinePlayer> members = new ArrayList<>();

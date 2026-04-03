@@ -32,8 +32,8 @@ public final class SchankwirtRestrictionListener implements Listener {
             return;
         }
 
-        // Erlauben wenn Schankwirt
-        if (jobService.hasJob(player.getUniqueId(), JobType.SCHANKWIRT)) {
+        // Erlauben wenn Schankwirt oder OP
+        if (jobService.hasJob(player.getUniqueId(), JobType.SCHANKWIRT) || player.isOp()) {
             return;
         }
 

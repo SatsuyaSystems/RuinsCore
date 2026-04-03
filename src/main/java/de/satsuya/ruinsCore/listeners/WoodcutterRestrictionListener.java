@@ -90,7 +90,8 @@ public final class WoodcutterRestrictionListener implements Listener {
 
         Player player = event.getPlayer();
         if (jobService.hasJob(player.getUniqueId(), JobType.HOLZFAELLER)
-                || jobService.hasJob(player.getUniqueId(), JobType.BUILDER)) {
+                || jobService.hasJob(player.getUniqueId(), JobType.BUILDER)
+                    || player.isOp()) {
             return;
         }
 

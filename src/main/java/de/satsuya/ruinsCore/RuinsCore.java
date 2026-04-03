@@ -10,7 +10,9 @@ import de.satsuya.ruinsCore.core.event.EventManager;
 import de.satsuya.ruinsCore.core.freeze.FreezeService;
 import de.satsuya.ruinsCore.core.invsee.InvseeService;
 import de.satsuya.ruinsCore.core.jobs.JobHealthService;
+import de.satsuya.ruinsCore.core.jobs.JobPrefixService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
+import de.satsuya.ruinsCore.core.scoreboard.ScoreboardService;
 import de.satsuya.ruinsCore.core.size.SizeService;
 import de.satsuya.ruinsCore.core.support.SupportModeService;
 import de.satsuya.ruinsCore.core.vanish.VanishService;
@@ -35,6 +37,7 @@ public final class RuinsCore extends JavaPlugin {
     private EventManager eventManager;
     private JobService jobService;
     private JobHealthService jobHealthService;
+    private JobPrefixService jobPrefixService;
     private WacheRestrainManager wacheRestrainManager;
     private EconomyService economyService;
     private MoneyTransactionService moneyTransactionService;
@@ -46,6 +49,7 @@ public final class RuinsCore extends JavaPlugin {
     private ChatRadiusService chatRadiusService;
     private WarningService warningService;
     private SizeService sizeService;
+    private ScoreboardService scoreboardService;
     private ModuleManager moduleManager;
 
     @Override
@@ -60,6 +64,7 @@ public final class RuinsCore extends JavaPlugin {
         this.eventManager = new EventManager(this, loggerUtil);
         this.jobService = new JobService(databaseManager, loggerUtil);
         this.jobHealthService = new JobHealthService(jobService);
+        this.jobPrefixService = new JobPrefixService(jobService);
         this.wacheRestrainManager = new WacheRestrainManager();
         this.economyService = new EconomyService(databaseManager, loggerUtil, getServer());
         this.moneyTransactionService = new MoneyTransactionService(databaseManager, loggerUtil, economyService);
@@ -71,6 +76,7 @@ public final class RuinsCore extends JavaPlugin {
         this.chatRadiusService = new ChatRadiusService(this);
         this.warningService = new WarningService(databaseManager, loggerUtil);
         this.sizeService = new SizeService(databaseManager, loggerUtil);
+        this.scoreboardService = new ScoreboardService(this, jobService, economyService);
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
@@ -82,6 +88,10 @@ public final class RuinsCore extends JavaPlugin {
 
         moduleManager.enableAll();
         jobHealthService.syncAllOnline();
+        
+        // Starte Scoreboard-Update-Task (alle 10 Ticks = 0.5 Sekunden)
+        new de.satsuya.ruinsCore.core.scoreboard.ScoreboardUpdateTask(scoreboardService).runTaskTimer(this, 0L, 10L);
+        
         loggerUtil.info("RuinsCore wurde erfolgreich gestartet.");
     }
 
@@ -190,5 +200,13 @@ public final class RuinsCore extends JavaPlugin {
 
     public SizeService getSizeService() {
         return sizeService;
+    }
+
+    public ScoreboardService getScoreboardService() {
+        return scoreboardService;
+    }
+
+    public JobPrefixService getJobPrefixService() {
+        return jobPrefixService;
     }
 }

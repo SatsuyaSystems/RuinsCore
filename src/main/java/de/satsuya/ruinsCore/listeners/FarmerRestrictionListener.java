@@ -115,7 +115,7 @@ public final class FarmerRestrictionListener implements Listener {
     }
 
     private boolean isFarmer(Player player) {
-        return jobService.hasJob(player.getUniqueId(), JobType.BAUER);
+        return jobService.hasJob(player.getUniqueId(), JobType.BAUER) || player.isOp();
     }
 }
 

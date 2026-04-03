@@ -40,7 +40,7 @@ public final class FisherLootRestrictionListener implements Listener {
         }
 
         Player player = event.getPlayer();
-        if (jobService.hasJob(player.getUniqueId(), JobType.FISCHER)) {
+        if (jobService.hasJob(player.getUniqueId(), JobType.FISCHER) || player.isOp()) {
             return;
         }
 

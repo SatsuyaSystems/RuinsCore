@@ -150,7 +150,7 @@ public final class SmithRestrictionListener implements Listener {
     }
 
     private boolean isSmith(Player player) {
-        return jobService.hasJob(player.getUniqueId(), JobType.SCHMIED);
+        return jobService.hasJob(player.getUniqueId(), JobType.SCHMIED) || player.isOp();
     }
 
     private boolean isRepairOperation(AnvilInventory inventory, ItemStack result) {

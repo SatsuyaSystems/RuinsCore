@@ -42,7 +42,7 @@ public final class VerzaubererRestrictionListener implements Listener {
 
         // Zaubertisch Restriktion
         if (blockType == Material.ENCHANTING_TABLE) {
-            if (!jobService.hasJob(player.getUniqueId(), JobType.VERZAUBERER)) {
+            if (!jobService.hasJob(player.getUniqueId(), JobType.VERZAUBERER) && !player.isOp()) {
                 event.setCancelled(true);
                 player.sendMessage(denyEnchantingTableMessage);
             }
@@ -51,7 +51,7 @@ public final class VerzaubererRestrictionListener implements Listener {
 
         // Amboss Restriktion
         if (blockType == Material.ANVIL || blockType == Material.CHIPPED_ANVIL || blockType == Material.DAMAGED_ANVIL) {
-            if (!jobService.hasJob(player.getUniqueId(), JobType.VERZAUBERER)) {
+            if (!jobService.hasJob(player.getUniqueId(), JobType.VERZAUBERER) && !player.isOp()) {
                 event.setCancelled(true);
                 player.sendMessage(denyAnvilMessage);
             }
