@@ -35,7 +35,11 @@ public enum PermissionNode {
     STAFF_ALERTS_RECEIVE("ruinscore.staff.alert.receive"),
     MARRY("ruinscore.command.marry"),
     COMMAND_PLAYTIME("ruinscore.command.playtime"),
-    COMMAND_PLAYTIME_OTHER("ruinscore.command.playtime.other");
+    COMMAND_PLAYTIME_OTHER("ruinscore.command.playtime.other"),
+    COMMAND_PENTAGRAM("ruinscore.command.pentagram"),
+    COMMAND_TURLOCK_ADMIN("ruinscore.command.turlock.admin"),
+    REPORT_USE("ruinscore.command.report.use"),
+    REPORT_VIEW("ruinscore.command.report.view");
 
     private final String node;
 

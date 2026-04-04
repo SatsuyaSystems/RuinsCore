@@ -41,30 +41,34 @@ public final class ChatRadiusListener implements Listener {
             return;
         }
 
-        // Wenn Sender hat Bypass: normale Nachricht für alle
-        if (sender.hasPermission("ruinscore.chat.bypass")) {
-            event.setFormat(jobPrefix + " §7%1$s§7: §f%2$s");
-            return;
-        }
-
-        // Cancele das Original-Event
+        // Cancele das Original-Event (wir kontrollieren wer die Nachricht sieht)
         event.setCancelled(true);
 
-        // Filtere die Empfänger basierend auf Radius
-        Set<Player> recipients = chatRadiusService.getReceipients(sender);
+        // Hole alle Spieler im Radius
+        Set<Player> radiusRecipients = chatRadiusService.getReceipients(sender);
 
-        // Sender sieht seine eigene Nachricht immer
-        recipients.add(sender);
+        // Erstelle formatierte Nachricht für normale Spieler
+        String normalMessage = jobPrefix + " §7" + sender.getName() + "§7: §f" + message;
+        Component normalComponent = Component.text(normalMessage);
 
-        // Erstelle formatierte Nachricht
-        Component formattedMessage = Component.text(
-            jobPrefix + " §7" + sender.getName() + "§7: §f" + message,
-            NamedTextColor.WHITE
-        );
+        // Sende Nachricht an alle Spieler im Radius
+        for (Player recipient : radiusRecipients) {
+            recipient.sendMessage(normalComponent);
+        }
 
-        // Sende Nachricht nur an zugelassene Spieler
-        for (Player recipient : recipients) {
-            recipient.sendMessage(formattedMessage);
+        // Finde alle Spieler die NICHT im Radius sind
+        for (Player allPlayer : Bukkit.getOnlinePlayers()) {
+            // Skip wenn Spieler bereits im Radius
+            if (radiusRecipients.contains(allPlayer) || allPlayer.equals(sender)) {
+                continue;
+            }
+
+            // Wenn Spieler Bypass-Permission hat: zeige mit [SPY] Prefix
+            if (allPlayer.hasPermission("ruinscore.chat.bypass")) {
+                String spyMessage = "§3[SPY] " + jobPrefix + " §7" + sender.getName() + "§7: §f" + message;
+                Component spyComponent = Component.text(spyMessage);
+                allPlayer.sendMessage(spyComponent);
+            }
         }
     }
 

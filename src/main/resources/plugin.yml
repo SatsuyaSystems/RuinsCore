@@ -109,3 +109,15 @@ permissions:
   ruinscore.command.playtime.other:
     description: Erlaubt die Spielzeit von anderen Spielern zu sehen.
     default: op
+  ruinscore.command.pentagram:
+    description: Erlaubt den /pentagram Command.
+    default: op
+  ruinscore.command.turlock.admin:
+    description: Erlaubt die Verwaltung aller Türschlösser.
+    default: op
+  ruinscore.command.report.use:
+    description: Erlaubt den /report Command.
+    default: true
+  ruinscore.command.report.view:
+    description: Erlaubt das Report-GUI für Supporter.
+    default: op

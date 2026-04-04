@@ -15,10 +15,15 @@ import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobPrefixService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.marry.MarryService;
+import de.satsuya.ruinsCore.core.pentagram.PentagramService;
 import de.satsuya.ruinsCore.core.playtime.PlaytimeService;
 import de.satsuya.ruinsCore.core.scoreboard.ScoreboardService;
 import de.satsuya.ruinsCore.core.size.SizeService;
 import de.satsuya.ruinsCore.core.support.SupportModeService;
+import de.satsuya.ruinsCore.core.turlock.DoorLockService;
+import de.satsuya.ruinsCore.core.turlock.DoorLockGuiService;
+import de.satsuya.ruinsCore.core.report.ReportService;
+import de.satsuya.ruinsCore.core.report.ReportGuiService;
 import de.satsuya.ruinsCore.core.vanish.VanishService;
 import de.satsuya.ruinsCore.core.wache.WacheRestrainManager;
 import de.satsuya.ruinsCore.core.warning.WarningService;
@@ -30,8 +35,13 @@ import de.satsuya.ruinsCore.core.permission.PermissionManager;
 import de.satsuya.ruinsCore.core.util.LoggerUtil;
 import de.satsuya.ruinsCore.core.util.StaffAlertUtil;
 import de.satsuya.ruinsCore.core.welcome.WelcomeService;
+import de.satsuya.ruinsCore.listeners.ChatRadiusListener;
 import de.satsuya.ruinsCore.listeners.playtime.PlaytimeListener;
+import de.satsuya.ruinsCore.listeners.turlock.DoorLockListener;
+import de.satsuya.ruinsCore.listeners.turlock.DoorLockGuiListener;
+import de.satsuya.ruinsCore.listeners.report.ReportGuiListener;
 import de.satsuya.ruinsCore.listeners.welcome.WelcomeListener;
+import de.satsuya.ruinsCore.commands.ReportCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class RuinsCore extends JavaPlugin {
@@ -62,6 +72,11 @@ public final class RuinsCore extends JavaPlugin {
     private AuctionService auctionService;
     private AuctionGuiService auctionGuiService;
     private WelcomeService welcomeService;
+    private PentagramService pentagramService;
+    private DoorLockService doorLockService;
+    private DoorLockGuiService doorLockGuiService;
+    private ReportService reportService;
+    private ReportGuiService reportGuiService;
     private ModuleManager moduleManager;
 
     @Override
@@ -95,21 +110,35 @@ public final class RuinsCore extends JavaPlugin {
         this.auctionService = new AuctionService(databaseManager, loggerUtil);
         this.auctionGuiService = new AuctionGuiService(auctionService);
         this.welcomeService = new WelcomeService(databaseManager, loggerUtil);
+        this.pentagramService = new PentagramService(this);
+        this.doorLockService = new DoorLockService(databaseManager, loggerUtil);
+        this.doorLockGuiService = new DoorLockGuiService(doorLockService);
+        this.reportService = new ReportService(databaseManager, loggerUtil);
+        this.reportGuiService = new ReportGuiService(reportService);
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
         String listenerPackage = getConfig().getString("loader.listener-package", "de.satsuya.ruinsCore.listeners");
 
-        moduleManager.registerModule(new DatabaseModule(databaseManager));
+        // Verbinde zuerst die Datenbank
+        DatabaseModule dbModule = new DatabaseModule(databaseManager);
+        dbModule.onEnable();
+
         moduleManager.registerModule(new CommandModule(commandManager, commandPackage));
         moduleManager.registerModule(new EventModule(eventManager, listenerPackage));
 
         moduleManager.enableAll();
         jobHealthService.syncAllOnline();
         
+        // Registriere Commands manuell (mit Abhängigkeiten)
+        commandManager.register(new ReportCommand(reportService, reportGuiService));
+        
         // Registriere Listener manuell
         getServer().getPluginManager().registerEvents(new PlaytimeListener(playtimeService), this);
         getServer().getPluginManager().registerEvents(new WelcomeListener(welcomeService), this);
+        getServer().getPluginManager().registerEvents(new DoorLockListener(doorLockService, doorLockGuiService, jobService), this);
+        getServer().getPluginManager().registerEvents(new DoorLockGuiListener(doorLockService, doorLockGuiService), this);
+        getServer().getPluginManager().registerEvents(new ReportGuiListener(reportService, reportGuiService), this);
 
         // Starte Scoreboard-Update-Task (alle 10 Ticks = 0.5 Sekunden)
         new de.satsuya.ruinsCore.core.scoreboard.ScoreboardUpdateTask(scoreboardService).runTaskTimer(this, 0L, 10L);
@@ -250,5 +279,17 @@ public final class RuinsCore extends JavaPlugin {
 
     public WelcomeService getWelcomeService() {
         return welcomeService;
+    }
+
+    public PentagramService getPentagramService() {
+        return pentagramService;
+    }
+
+    public DoorLockService getDoorLockService() {
+        return doorLockService;
+    }
+
+    public DoorLockGuiService getDoorLockGuiService() {
+        return doorLockGuiService;
     }
 }

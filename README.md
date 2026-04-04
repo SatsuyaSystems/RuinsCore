@@ -13,6 +13,11 @@ RuinsCore ist ein modular aufgebautes Paper-Plugin (1.21.4) mit dynamischem Lade
 - 📊 **SQLite Datenbank**: Persistente Speicherung aller Daten
 - 🔌 **Dynamisches Laden**: Commands und Listener werden automatisch geladen
 - 🔐 **Permission-System**: Granulare Kontrolle über alle Features
+- 🎂 **Auktionssystem**: Spieler können Items kaufen und verkaufen
+- 👰 **Marry System**: Spieler können verheiratet werden mit Partner-Anzeige
+- 📋 **Report System**: Spieler-Meldungen für Supporter-Verwaltung
+- 🚪 **Door Lock System**: Türen mit Whitelist-Verwaltung
+- ✨ **Pentagram System**: Visuelle Feuer-Effekte
 
 ## Architektur
 
@@ -22,6 +27,31 @@ RuinsCore ist ein modular aufgebautes Paper-Plugin (1.21.4) mit dynamischem Lade
 - SQLite-Datenhaltung über `DatabaseManager` (lokale Datei im Plugin-Datenordner)
 - Utility-Layer für Logging (`LoggerUtil`) und Staff-Benachrichtigungen (`StaffAlertUtil`)
 - Permission-Handling mit `PermissionNode`-Enum + `PermissionManager`
+
+| System | Package | Features |
+|--------|---------|----------|
+| **Report System** | `de.satsuya.ruinsCore.core.report` | Spieler-Meldungen, Supporter-GUI, Verwaltung |
+| **Door Lock System** | `de.satsuya.ruinsCore.core.turlock` | Tür-Sperren, Whitelist, Admin-Management |
+| **Pentagram System** | `de.satsuya.ruinsCore.core.pentagram` | Feuer-Effekte, 10s Animation |
+
+### Report System - 3 Dateien
+- `ReportService` - Datenbank-Verwaltung
+- `ReportGuiService` - GUI-Erstellung
+- `ReportGuiListener` - Event-Handling
+- `ReportCommand` - Command-Logik
+- `ReportGuiHolder` - InventoryHolder
+
+### Door Lock System - 5+ Dateien
+- `DoorLockService` - Core-Logik
+- `DoorLockGuiService` - GUI-Management
+- `DoorLockListener` - Shift+Rechtsklick Handler
+- `DoorLockGuiListener` - GUI Click Handler
+- `DoorLockGuiHolder` - Hauptmenü InventoryHolder
+- `DoorLockWhitelistGuiHolder` - Whitelist InventoryHolder
+
+### Pentagram System - 2 Dateien
+- `PentagramService` - Partikel-Logik
+- `PentagramCommand` - Command
 
 ## Aktueller Funktionsumfang
 
@@ -96,6 +126,9 @@ Leader können das GUI ebenfalls nutzen, aber nur für ihre eigenen Jobs. Admins
 - `/marry info <Spieler>` (Admin) - Zeige Ehe-Information
 - `/playtime` - Zeige deine Spielzeit an
 - `/playtime <Spieler>` (Admin) - Zeige Spielzeit eines anderen Spielers
+- `/report <Spieler> <Grund...>` - Melde einen Spieler
+- `/report gui` (Supporter) - Öffne Report-Verwaltungs-GUI
+- `/pentagram` (Admin) - Erstelle ein Feuer-Pentagramm
 
 ## Welcome System
 
@@ -135,7 +168,11 @@ Aus `plugin.yml`:
 - `ruinscore.auction.use` (use auction system)
 - `ruinscore.command.marry` (marry/divorce/info players)
 - `ruinscore.command.playtime` (view own playtime)
-- `ruinscore.command.playtime.other` (view other player playtimes)
+   - `ruinscore.command.playtime.other` (view other player playtimes)
+   - `ruinscore.command.report.use` (use report system)
+   - `ruinscore.command.report.view` (view reports via GUI)
+   - `ruinscore.command.pentagram` (create pentagrams)
+   - `ruinscore.command.turlock.admin` (manage all door locks)
 
 ## Playtime Tracking System
 
@@ -824,11 +861,15 @@ Beim Start werden automatisch erstellt:
 - `player_economy` - Speichert das Guthaben jedes Spielers
 - `money_requests` - Speichert Geldanfragen (PENDING/ACCEPTED/DECLINED)
 - `player_warnings` - Speichert Verwarnungen pro Spieler
+- `player_sizes` - Speichert die Spielergröße
 - `auctions` - Speichert alle aktiven Auktionen
 - `player_marriages` - Speichert verheiratete Spieler-Paare
 - `player_marriages_names` - Speichert Partner-Namen für Offline-Anzeige
 - `player_playtime` - Speichert die Spielzeit jedes Spielers
 - `player_welcome` - Speichert welche Spieler bereits begrüßt wurden
+- `door_locks` - Speichert alle Türschlösser mit Einstellungen
+- `door_lock_whitelist` - Speichert Whitelist-Spieler für jede Tür
+- `reports` - Speichert alle Spieler-Meldungen mit Status
 
 ## Vanish System
 
@@ -861,6 +902,264 @@ Das Vanish-System versteckt Spieler vollständig für andere Spieler:
 1. Klasse im Package `de.satsuya.ruinsCore.listeners` anlegen
 2. `Listener` implementieren und `@EventHandler` setzen
 3. Wird beim Start automatisch registriert
+
+## Report System
+
+Das Report System erlaubt Spielern, andere Spieler zu melden, und Supportern, diese Reports über ein GUI zu verwalten:
+
+### Features
+
+- **Spieler-Meldungen**: Spieler können andere melden mit Grund
+- **Report-GUI**: Supporter können alle Reports in einem GUI einsehen
+- **Detail-Ansicht**: Klick auf Report zeigt alle Informationen
+- **Als bearbeitet markieren**: Reporter können Reports als bearbeitet markieren und löschen
+- **Datenbank-Persistenz**: Alle Reports werden in SQLite gespeichert
+- **Status-Tracking**: Reports haben Status (OPEN/GESCHLOSSEN)
+
+### Commands
+
+#### `/report <Spieler> <Grund...>`
+- Melde einen Spieler
+- Grund wird in DB gespeichert
+- Gemeldeter Spieler sieht Benachrichtigung
+- Beispiel: `/report JibrilPlayer Spam in Chat`
+- Require: `ruinscore.command.report.use`
+
+#### `/report gui`
+- Öffne die Report-Übersicht (nur für Supporter)
+- Zeigt alle offenen Reports
+- Klick auf Report zur Detail-Ansicht
+- Require: `ruinscore.command.report.view`
+
+### Report-Übersicht-GUI
+
+Das Report-GUI zeigt alle offenen Reports in einer übersichtlichen Liste:
+
+**Layout:**
+- **Slots 0-44**: Report-Items mit Reporter, Beschuldigt, Grund
+- **Slot 53 (oder letzter Slot)**: Zurück-Button
+- **Dynamische Größe**: GUI vergrößert sich automatisch basierend auf Anzahl der Reports
+
+**Report-Item anzeigen:**
+```
+Beschuldigt: JibrilPlayer
+Von: OtherPlayer  
+Grund: Spam in...
+ID: 42
+Klick zum Einsehen
+```
+
+### Report-Detail-GUI
+
+Die Detail-Ansicht zeigt alle Informationen zu einem Report:
+
+**Layout (27 Slots):**
+- **Slot 10**: Reporter-Info (PLAYER_HEAD mit Name und UUID)
+- **Slot 12**: Pfeiltrenner (→)
+- **Slot 14**: Beschuldigter-Info (PLAYER_HEAD mit Name und UUID)
+- **Slot 19**: Grund-Info (BOOK mit vollständiger Grund)
+- **Slot 23**: Zeit-Info (CLOCK mit Erstellungszeit)
+- **Slot 24**: ✓ Bearbeitet (Grüner Block - Report löschen)
+- **Slot 26**: ← Zurück (Barrier)
+
+**Funktionen:**
+- Klick auf "Bearbeitet" markiert Report als bearbeitet
+- Report wird aus DB gelöscht
+- Spieler sieht Bestätigung
+- Zurück zur Übersicht
+
+### Ablauf
+
+1. **Spieler meldet**: `/report Hacker Speedhack`
+2. **Report wird gespeichert**: In `reports` Tabelle mit Status OPEN
+3. **Supporter öffnet GUI**: `/report gui`
+4. **Supporter sieht Reports**: List aller offenen Reports
+5. **Supporter klickt auf Report**: Detail-View öffnet sich
+6. **Supporter liest Informationen**: Reporter, Beschuldigt, Grund, Zeit
+7. **Supporter markiert als bearbeitet**: Klick auf grünen Block
+8. **Report wird gelöscht**: Aus DB entfernt, GUI aktualisiert
+
+### Implementierung
+
+- `ReportService` - Core-Logik (create, getOpenReports, closeReport)
+- `ReportGuiService` - GUI-Verwaltung (Übersicht, Detail)
+- `ReportGuiListener` - Event-Handler für GUI-Interaktionen
+- `ReportGuiHolder` - InventoryHolder für Reports
+- Command: `ReportCommand`
+- Datenbank-Tabelle: `reports`
+
+### Datenbank
+
+**Tabelle: `reports`**
+- `id` - Eindeutige Report-ID
+- `reporter_uuid` - UUID des Reporters
+- `reporter_name` - Name des Reporters
+- `reported_uuid` - UUID des Beschuldigten
+- `reported_name` - Name des Beschuldigten
+- `reason` - Grund der Meldung
+- `created_at` - Erstellungszeit
+- `status` - Status (OPEN/CLOSED)
+
+### Validierungen
+
+✅ Spieler kann sich nicht selbst melden
+✅ Spieler wird benachrichtigt bei Meldung
+✅ Nur Supporter mit Permission können Reports einsehen
+✅ Alle Reports werden persistent gespeichert
+
+## Door Lock System
+
+Das Door Lock System erlaubt Spielern, Türen zu schließen und Zugriff zu verwalten:
+
+### Features
+
+- **Türschlösser**: Spieler können Türen mit SHIFT+Rechtsklick schließen
+- **Öffentlich/Privat**: Türen können öffentlich oder privat sein
+- **Whitelist-System**: Private Türen können mit Whitelist verwaltet werden
+- **Admin-Override**: Admins mit Permission können alle Türen verwalten
+- **Wache-Bypass**: Die Wache kann alle Türen öffnen
+- **GUI-Verwaltung**: Intuitive GUI für Türschloss-Verwaltung
+- **Datenbank-Persistenz**: Alle Türschlösser werden gespeichert
+
+### Commands
+
+#### Türschloss-Verwaltung (Shift + Rechtsklick)
+- **Auf verschlossene Tür**: Öffnet Verwaltungs-GUI
+- **Auf neue Tür**: Erstellt neues Türschloss und öffnet GUI
+- Nur Besitzer oder Admins können verwalten
+- Require: Keine (jeder kann seine Türen sperren)
+
+### Türschloss-GUI
+
+**Hauptmenü (27 Slots):**
+- **Slot 11**: Öffentlich/Privat Button (Toggle)
+- **Slot 13**: Info-Anzeige (Besitzer, Status)
+- **Slot 15**: Whitelist-Button (nur wenn privat)
+- **Slot 26**: Zurück-Button
+
+**Whitelist-GUI (54 Slots):**
+- **Slots 0-47**: Spieler auf Whitelist (klick zum Entfernen)
+- **Slot 48**: ➕ Spieler Hinzufügen
+- **Slot 49**: ← Zurück
+
+**Spieler-Auswahl-GUI (54 Slots):**
+- **Slots 0-48**: Online-Spieler (nicht auf Whitelist)
+- **Slot 49**: ← Zurück
+
+### Ablauf
+
+1. **Tür erstellen**: Shift + Rechtsklick auf neue Tür
+2. **GUI öffnet sich**: Hauptmenü mit Optionen
+3. **Status ändern**: Klick auf Öffentlich-Button
+   - Grüner Button = Öffentlich (alle können öffnen)
+   - Roter Button = Privat (nur Whitelist)
+4. **Whitelist verwalten** (nur bei privaten Türen):
+   - Klick auf Whitelist-Button
+   - Klick auf Spieler zum Entfernen oder ➕ zum Hinzufügen
+
+### Features beim Öffnen
+
+- **Öffentlich**: Jeder kann die Tür öffnen
+- **Privat ohne Whitelist**: Nur der Besitzer kann öffnen
+- **Privat mit Whitelist**: Besitzer + Whitelist-Spieler
+- **Wache-Bypass**: Wache kann immer öffnen
+- **Admin-Override**: Admins können immer verwalten
+
+### Implementierung
+
+- `DoorLockService` - Core-Logik (erstellen, Whitelist, Permissions)
+- `DoorLockGuiService` - GUI-Verwaltung (Hauptmenü, Whitelist)
+- `DoorLockListener` - Event-Handler (Shift+Rechtsklick)
+- `DoorLockGuiListener` - Event-Handler für GUI-Clicks
+- `DoorLockGuiHolder` - InventoryHolder für Hauptmenü
+- `DoorLockWhitelistGuiHolder` - InventoryHolder für Whitelist-GUIs
+- Datenbank-Tabellen: `door_locks`, `door_lock_whitelist`
+
+### Datenbank
+
+**Tabelle: `door_locks`**
+- `door_key` - Eindeutiger Schlüssel (world_x_y_z)
+- `world`, `x`, `y`, `z` - Tür-Position
+- `owner_uuid` - UUID des Besitzers
+- `owner_name` - Name des Besitzers
+- `is_public` - Öffentlich oder privat
+- `created_at` - Erstellungszeit
+
+**Tabelle: `door_lock_whitelist`**
+- `door_key` - Referenz zur Tür
+- `player_uuid` - UUID des Spielers
+- `player_name` - Name des Spielers
+
+### Validierungen
+
+✅ Nur Besitzer oder Admins können Türschloss verwalten
+✅ Wache kann alle Türen öffnen
+✅ Whitelist nur bei privaten Türen
+✅ Spieler können nicht zweimal auf Whitelist sein
+✅ Tür-Position wird korrekt gespeichert
+
+## Pentagram System
+
+Das Pentagram System erzeugt Feuer-Pentagramme um die Position eines Spielers:
+
+### Features
+
+- **Feuer-Pentagramme**: Erzeugt 5-zackige Sterne aus Feuer-Partikeln
+- **Automatische Löschung**: Pentagramm hält 10 Sekunden
+- **Pro Spieler**: Jeder Spieler kann nur sein eigenes Pentagramm haben
+- **Visuelle Effekte**: FLAME-Partikel in stabilen Linien
+- **Live-Animation**: Pentagramm wird 5x pro Sekunde neu gezeichnet
+
+### Commands
+
+#### `/pentagram`
+- Erstelle ein Pentagramm um deine Position
+- Hält 10 Sekunden lang
+- Nur eine Pentagramm pro Spieler aktiv
+- Erneutes Ausführen überschreibt vorheriges
+- Beispiel: `/pentagram`
+- Require: `ruinscore.command.pentagram`
+
+### Visuelle Darstellung
+
+Das Pentagramm besteht aus:
+- **5 Spitzen** in einem Kreis (Radius: ca. 2 Blöcke)
+- **FLAME-Partikel** (Feuer)
+- **Verbindungslinien** zwischen den Spitzen (5-zackiger Stern)
+- **Animierte Anzeige** (wird alle 0.1 Sekunden neu gezeichnet)
+
+### Ablauf
+
+1. Spieler gibt `/pentagram` ein
+2. Pentagramm wird um seine Position erzeugt
+3. Visuelle Effekte sind sofort sichtbar
+4. Nach 10 Sekunden verschwindet das Pentagramm automatisch
+5. Spieler kann neues Pentagramm erstellen
+
+### Implementierung
+
+- `PentagramService` - Core-Logik (Erstellung, Animation, Löschung)
+- Command: `PentagramCommand`
+- Nutzt `BukkitScheduler` für repeating Tasks
+- Berechnet Pentagramm-Spitzen mathematisch
+- Spawnt FLAME-Partikel in Linien
+
+### Konfiguration
+
+Aktuell fest im Code:
+- **Radius**: ca. 2 Blöcke
+- **Update-Rate**: Alle 2 Ticks (0.1 Sekunde)
+- **Dauer**: 10 Sekunden (200 Ticks)
+- **Partikel-Abstand**: 0.4 Blöcke pro Partikel
+- **Partikel-Typ**: FLAME
+
+### Technische Details
+
+- Verwendet trigonometrische Funktionen (Math.cos/Math.sin)
+- Berechnet 5 Spitzen à 72° Winkel-Abstand
+- Verbindet jede Spitze mit den nächsten zwei Spitzen
+- Spawnt Partikel entlang aller Linien
+- Cleanup erfolgt automatisch nach 10 Sekunden
 
 ## Hinweise
 

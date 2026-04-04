@@ -32,6 +32,7 @@ public final class CommandManager {
         try {
             Set<Class<?>> scannedClasses = ClassScanner.scanPackage(plugin.getClass().getClassLoader(), packageName);
             int loaded = 0;
+            int skipped = 0;
 
             for (Class<?> scannedClass : scannedClasses) {
                 if (!CoreCommand.class.isAssignableFrom(scannedClass)) {
@@ -41,12 +42,18 @@ public final class CommandManager {
                     continue;
                 }
 
-                CoreCommand command = (CoreCommand) instantiate(scannedClass);
-                register(command);
-                loaded++;
+                try {
+                    CoreCommand command = (CoreCommand) instantiate(scannedClass);
+                    register(command);
+                    loaded++;
+                } catch (ReflectiveOperationException e) {
+                    // Überspringe Commands mit Abhängigkeiten (werden manuell registriert)
+                    loggerUtil.info("Überspringe Command mit Abhängigkeiten: " + scannedClass.getSimpleName());
+                    skipped++;
+                }
             }
 
-            loggerUtil.info("Dynamische Commands geladen: " + loaded + " aus " + packageName);
+            loggerUtil.info("Dynamische Commands geladen: " + loaded + " aus " + packageName + " (übersprungen: " + skipped + ")");
         } catch (Exception exception) {
             loggerUtil.severe("Command-Package konnte nicht geladen werden: " + packageName, exception);
         }

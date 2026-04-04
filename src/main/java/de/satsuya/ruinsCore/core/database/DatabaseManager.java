@@ -145,6 +145,42 @@ public final class DatabaseManager {
                     first_join LONG NOT NULL
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS door_locks (
+                    door_key TEXT PRIMARY KEY,
+                    world TEXT NOT NULL,
+                    x INTEGER NOT NULL,
+                    y INTEGER NOT NULL,
+                    z INTEGER NOT NULL,
+                    owner_uuid TEXT NOT NULL,
+                    owner_name TEXT NOT NULL,
+                    is_public BOOLEAN NOT NULL DEFAULT 1,
+                    created_at LONG NOT NULL
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS door_lock_whitelist (
+                    door_key TEXT NOT NULL,
+                    player_uuid TEXT NOT NULL,
+                    player_name TEXT NOT NULL,
+                    PRIMARY KEY (door_key, player_uuid)
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    reporter_uuid TEXT NOT NULL,
+                    reporter_name TEXT NOT NULL,
+                    reported_uuid TEXT NOT NULL,
+                    reported_name TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status TEXT NOT NULL DEFAULT 'OPEN'
+                )
+                """);
     }
 
     public boolean isConnected() {
