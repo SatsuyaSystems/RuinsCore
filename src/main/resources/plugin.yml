@@ -100,3 +100,6 @@ permissions:
   ruinscore.staff.alert.receive:
     description: Erlaubt den Empfang von Staff-Alerts.
     default: op
+  ruinscore.command.marry:
+    description: Erlaubt den /marry Command zur Verheiratung von Spielern.
+    default: op

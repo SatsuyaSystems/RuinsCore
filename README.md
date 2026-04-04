@@ -91,6 +91,9 @@ Leader können das GUI ebenfalls nutzen, aber nur für ihre eigenen Jobs. Admins
 - `/size <Größe>` - Ändere deine Spielergröße (0.6 - 1.1)
 - `/size <Spieler> <Größe>` (Admin) - Ändere Spielergröße
 - `/msg` (Spy - Admin) - Sehe private Nachrichten anderer
+- `/marry marry <Spieler1> <Spieler2>` (Admin) - Verheirate zwei Spieler
+- `/marry divorce <Spieler>` (Admin) - Scheiden
+- `/marry info <Spieler>` (Admin) - Zeige Ehe-Information
 
 ## Permissions
 
@@ -128,8 +131,9 @@ Aus `plugin.yml`:
 - `ruinscore.staff.alert.send`
 - `ruinscore.staff.alert.receive`
 - `ruinscore.auction.use` (use auction system)
+- `ruinscore.command.marry` (marry/divorce/info players)
 
-## Geldsystem
+## Marry System
 
 Das Geldsystem erlaubt Spielern, Guthaben zu haben und zwischen Spielern zu transferieren.
 
@@ -159,6 +163,94 @@ Neue Tabellen:
 - `MoneyTransactionService` - Verwaltung von Geldanfragen (create, accept, decline)
 - `EconomyJoinListener` - Initialisiert Konten beim Login
 - Commands: `MoneyCommand`, `PayCommand`, `RequestCommand`, `RequestsCommand`
+
+## Marry System
+
+Das Marry System erlaubt Admins, zwei Spieler zu verheiraten und zeigt den Partner im Scoreboard und der Tablist an:
+
+### Features
+
+- **Verheiratung**: Admin kann zwei Spieler verheiraten
+- **Scheidung**: Spieler können geschieden werden
+- **Partner-Info**: Partner wird im Scoreboard und im Tablist Footer angezeigt
+- **Persistenz**: Ehestatus wird in der Datenbank gespeichert
+- **Auto-Laden**: Alle Ehen werden beim Start aus der DB geladen
+- **Live-Updates**: Scoreboard aktualisiert sich automatisch
+
+### Commands
+
+#### `/marry marry <Spieler1> <Spieler2>`
+- Verheirate zwei Spieler
+- Beide Spieler müssen online sein
+- Spieler dürfen nicht bereits verheiratet sein
+- Beispiel: `/marry marry Alice Bob`
+- Require: `ruinscore.command.marry`
+
+#### `/marry divorce <Spieler>`
+- Trenne ein Ehepaar
+- Beispiel: `/marry divorce Alice`
+- Require: `ruinscore.command.marry`
+
+#### `/marry info <Spieler>`
+- Zeige Informationen über die Ehe eines Spielers
+- Beispiel: `/marry info Alice`
+- Require: `ruinscore.command.marry`
+
+### Anzeige im Scoreboard
+
+Das Scoreboard zeigt den Partner eines verheirateten Spielers an:
+
+```
+◆ RuinsCore ◆
+────────────────
+Job: Schmied
+Geld: 1234.50€
+Partner: 💕 Bob
+────────────────
+Uhrzeit: 15:30:45
+Ping: 45ms
+```
+
+### Anzeige in der Tablist
+
+Der Partner wird auch im Tablist Footer angezeigt:
+
+```
+═══════════════════════════════════
+Willkommen auf RuinsCore Server
+═══════════════════════════════════
+
+───────────────────────────────────
+Job: Schmied │ Geld: 1234.50€
+Partner: 💕 Bob
+───────────────────────────────────
+```
+
+### Implementierung
+
+- `MarryService` - Core-Logik (verheiraten, scheiden, Partner laden)
+- Command: `MarryCommand`
+- Datenbank-Tabelle: `player_marriages` (speichert Paare)
+- Datenbank-Tabelle: `player_marriages_names` (speichert Partner-Namen offline)
+- Integration in `ScoreboardService` für Anzeige
+
+### Datenbank
+
+**Tabelle: `player_marriages`**
+- `player1_uuid` - UUID des ersten Partners
+- `player2_uuid` - UUID des zweiten Partners
+- `married_at` - Hochzeitsdatum
+
+**Tabelle: `player_marriages_names`**
+- `player_uuid` - UUID des Spielers
+- `player_name` - Name des Partners (für Offline-Anzeige)
+
+### Validierungen
+
+✅ Beide Spieler müssen online sein zum Verheiraten
+✅ Spieler dürfen nicht bereits verheiratet sein
+✅ Partner-Namen werden für Offline-Anzeige gespeichert
+✅ Automatisches Laden aus DB beim Start
 
 ## Essentials-like Commands
 
@@ -643,6 +735,8 @@ Beim Start werden automatisch erstellt:
 - `money_requests` - Speichert Geldanfragen (PENDING/ACCEPTED/DECLINED)
 - `player_warnings` - Speichert Verwarnungen pro Spieler
 - `auctions` - Speichert alle aktiven Auktionen
+- `player_marriages` - Speichert verheiratete Spieler-Paare
+- `player_marriages_names` - Speichert Partner-Namen für Offline-Anzeige
 
 ## Vanish System
 

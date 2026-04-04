@@ -3,6 +3,7 @@ package de.satsuya.ruinsCore.core.scoreboard;
 import de.satsuya.ruinsCore.RuinsCore;
 import de.satsuya.ruinsCore.core.economy.EconomyService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
+import de.satsuya.ruinsCore.core.marry.MarryService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -23,12 +24,28 @@ public final class ScoreboardService {
     private final RuinsCore plugin;
     private final JobService jobService;
     private final EconomyService economyService;
+    private MarryService marryService;
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
     public ScoreboardService(RuinsCore plugin, JobService jobService, EconomyService economyService) {
         this.plugin = plugin;
         this.jobService = jobService;
         this.economyService = economyService;
+        this.marryService = null;
+    }
+
+    public ScoreboardService(RuinsCore plugin, JobService jobService, EconomyService economyService, MarryService marryService) {
+        this.plugin = plugin;
+        this.jobService = jobService;
+        this.economyService = economyService;
+        this.marryService = marryService;
+    }
+
+    /**
+     * Setze MarryService nach Initialisierung
+     */
+    public void setMarryService(MarryService marryService) {
+        this.marryService = marryService;
     }
 
     /**
@@ -68,7 +85,8 @@ public final class ScoreboardService {
         double money = economyService.getBalance(player.getUniqueId());
         String timeString = timeFormat.format(new Date());
         int ping = player.getPing();
-        
+        String partnerName = getPartnerName(player.getUniqueId());
+
         // Setze neue Scores (von unten nach oben)
         int score = 10;
         
@@ -81,6 +99,11 @@ public final class ScoreboardService {
         // Uhrzeit
         objective.getScore("§dUhrzeit: §5" + timeString).setScore(score--);
         
+        // Partner (wenn verheiratet)
+        if (partnerName != null) {
+            objective.getScore("§dPartner: §d💕§5" + partnerName).setScore(score--);
+        }
+
         // Leerzeile
         objective.getScore("§d").setScore(score--);
         
@@ -99,7 +122,8 @@ public final class ScoreboardService {
         String jobName = getPlayerJob(player.getUniqueId());
         double money = economyService.getBalance(player.getUniqueId());
         String moneyFormatted = String.format("%.2f", money);
-        
+        String partnerName = getPartnerName(player.getUniqueId());
+
         // Header mit Lila-Pink Gradient
         Component header = Component.text(
             "§5§l═══════════════════════════════════\n" +
@@ -108,14 +132,18 @@ public final class ScoreboardService {
             NamedTextColor.LIGHT_PURPLE
         );
         
-        // Footer mit Lila-Pink Gradient
-        Component footer = Component.text(
-            "§5───────────────────────────────────\n" +
-            "§dJob: §5" + jobName + " §d│ §dGeld: §5" + moneyFormatted + "€\n" +
-            "§5───────────────────────────────────",
-            NamedTextColor.LIGHT_PURPLE
-        );
-        
+        // Footer mit Lila-Pink Gradient und Partner-Info
+        String footerText = "§5───────────────────────────────────\n" +
+            "§dJob: §5" + jobName + " §d│ §dGeld: §5" + moneyFormatted + "€";
+
+        if (partnerName != null) {
+            footerText += "\n§dPartner: §d💕§5" + partnerName;
+        }
+
+        footerText += "\n§5───────────────────────────────────";
+
+        Component footer = Component.text(footerText, NamedTextColor.LIGHT_PURPLE);
+
         player.sendPlayerListHeaderAndFooter(header, footer);
     }
 
@@ -129,6 +157,16 @@ public final class ScoreboardService {
         } catch (Exception e) {
             return "§cError";
         }
+    }
+
+    /**
+     * Gibt den Namen des Partners zurück
+     */
+    private String getPartnerName(UUID playerUuid) {
+        if (marryService == null) {
+            return null;
+        }
+        return marryService.getPartnerName(playerUuid);
     }
 
     /**

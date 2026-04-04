@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
 public final class DatabaseManager {
 
     private final JavaPlugin plugin;
@@ -113,6 +114,22 @@ public final class DatabaseManager {
                     expires_at INTEGER NOT NULL
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_marriages (
+                    player1_uuid TEXT NOT NULL,
+                    player2_uuid TEXT NOT NULL,
+                    married_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (player1_uuid, player2_uuid)
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_marriages_names (
+                    player_uuid TEXT PRIMARY KEY,
+                    player_name TEXT NOT NULL
+                )
+                """);
     }
 
     public boolean isConnected() {
@@ -150,6 +167,20 @@ public final class DatabaseManager {
         }
     }
 
+    public void executeUpdate(String sql, StatementSetter setter) {
+        if (!isConnected()) {
+            loggerUtil.warning("SQL Update übersprungen, weil keine Verbindung aktiv ist.");
+            return;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            setter.setValues(statement);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            loggerUtil.severe("SQL Update fehlgeschlagen: " + sql, exception);
+        }
+    }
+
     public ResultSet executeQuery(String sql, Object... parameters) throws SQLException {
         if (!isConnected()) {
             throw new SQLException("Keine aktive SQLite-Verbindung.");
@@ -157,6 +188,16 @@ public final class DatabaseManager {
 
         PreparedStatement statement = connection.prepareStatement(sql);
         bindParameters(statement, parameters);
+        return statement.executeQuery();
+    }
+
+    public ResultSet executeQuery(String sql, StatementSetter setter) throws SQLException {
+        if (!isConnected()) {
+            throw new SQLException("Keine aktive SQLite-Verbindung.");
+        }
+
+        PreparedStatement statement = connection.prepareStatement(sql);
+        setter.setValues(statement);
         return statement.executeQuery();
     }
 

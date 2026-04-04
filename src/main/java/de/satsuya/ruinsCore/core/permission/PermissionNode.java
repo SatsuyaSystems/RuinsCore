@@ -32,7 +32,8 @@ public enum PermissionNode {
     JOB_GUI("ruinscore.job.gui"),
     AUCTION_USE("ruinscore.auction.use"),
     STAFF_ALERTS_SEND("ruinscore.staff.alert.send"),
-    STAFF_ALERTS_RECEIVE("ruinscore.staff.alert.receive");
+    STAFF_ALERTS_RECEIVE("ruinscore.staff.alert.receive"),
+    MARRY("ruinscore.command.marry");
 
     private final String node;
 

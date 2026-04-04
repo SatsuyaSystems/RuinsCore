@@ -14,6 +14,7 @@ import de.satsuya.ruinsCore.core.invsee.InvseeService;
 import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobPrefixService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
+import de.satsuya.ruinsCore.core.marry.MarryService;
 import de.satsuya.ruinsCore.core.scoreboard.ScoreboardService;
 import de.satsuya.ruinsCore.core.size.SizeService;
 import de.satsuya.ruinsCore.core.support.SupportModeService;
@@ -51,6 +52,7 @@ public final class RuinsCore extends JavaPlugin {
     private ChatRadiusService chatRadiusService;
     private WarningService warningService;
     private SizeService sizeService;
+    private MarryService marryService;
     private ScoreboardService scoreboardService;
     private AuctionService auctionService;
     private AuctionGuiService auctionGuiService;
@@ -80,7 +82,9 @@ public final class RuinsCore extends JavaPlugin {
         this.chatRadiusService = new ChatRadiusService(this);
         this.warningService = new WarningService(databaseManager, loggerUtil);
         this.sizeService = new SizeService(databaseManager, loggerUtil);
+        this.marryService = new MarryService(databaseManager, loggerUtil);
         this.scoreboardService = new ScoreboardService(this, jobService, economyService);
+        this.scoreboardService.setMarryService(marryService);
         this.auctionService = new AuctionService(databaseManager, loggerUtil);
         this.auctionGuiService = new AuctionGuiService(auctionService);
         this.moduleManager = new ModuleManager(loggerUtil);
@@ -222,5 +226,9 @@ public final class RuinsCore extends JavaPlugin {
 
     public AuctionGuiService getAuctionGuiService() {
         return auctionGuiService;
+    }
+
+    public MarryService getMarryService() {
+        return marryService;
     }
 }
