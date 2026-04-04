@@ -45,8 +45,8 @@ public final class ClassScanner {
             }
 
             for (File file : files) {
+                // Ignoriere Unterordner (Subpackages)
                 if (file.isDirectory()) {
-                    scanDirectory(classes, packageName + "." + file.getName(), file.toURI().toURL());
                     continue;
                 }
 
@@ -55,7 +55,7 @@ public final class ClassScanner {
                     addClass(classes, className);
                 }
             }
-        } catch (URISyntaxException | IOException ignored) {
+        } catch (URISyntaxException ignored) {
             // Scanning failure is handled by caller logs.
         }
     }
@@ -70,6 +70,13 @@ public final class ClassScanner {
                     String name = entry.getName();
 
                     if (!name.startsWith(packagePath) || !name.endsWith(".class") || name.contains("$")) {
+                        continue;
+                    }
+
+                    // Prüfe, ob die Datei direkt im Package ist (nicht in Subpackages)
+                    String relativePath = name.substring(packagePath.length() + 1);
+                    if (relativePath.contains("/")) {
+                        // Datei ist in einem Subpackage, ignoriere es
                         continue;
                     }
 

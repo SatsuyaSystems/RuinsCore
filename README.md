@@ -94,8 +94,10 @@ Leader können das GUI ebenfalls nutzen, aber nur für ihre eigenen Jobs. Admins
 - `/marry marry <Spieler1> <Spieler2>` (Admin) - Verheirate zwei Spieler
 - `/marry divorce <Spieler>` (Admin) - Scheiden
 - `/marry info <Spieler>` (Admin) - Zeige Ehe-Information
+- `/playtime` - Zeige deine Spielzeit an
+- `/playtime <Spieler>` (Admin) - Zeige Spielzeit eines anderen Spielers
 
-## Permissions
+## Welcome System
 
 Aus `plugin.yml`:
 
@@ -132,8 +134,10 @@ Aus `plugin.yml`:
 - `ruinscore.staff.alert.receive`
 - `ruinscore.auction.use` (use auction system)
 - `ruinscore.command.marry` (marry/divorce/info players)
+- `ruinscore.command.playtime` (view own playtime)
+- `ruinscore.command.playtime.other` (view other player playtimes)
 
-## Marry System
+## Playtime Tracking System
 
 Das Geldsystem erlaubt Spielern, Guthaben zu haben und zwischen Spielern zu transferieren.
 
@@ -163,6 +167,92 @@ Neue Tabellen:
 - `MoneyTransactionService` - Verwaltung von Geldanfragen (create, accept, decline)
 - `EconomyJoinListener` - Initialisiert Konten beim Login
 - Commands: `MoneyCommand`, `PayCommand`, `RequestCommand`, `RequestsCommand`
+
+## Playtime Tracking System
+
+Das Playtime Tracking System verfolgt die Spielzeit jedes Spielers:
+
+### Features
+
+- **Automatisches Tracking**: Spielzeit wird beim Login/Logout automatisch gemessen
+- **Persistente Speicherung**: Alle Spielzeiten werden in SQLite gespeichert
+- **Formatierte Ausgabe**: Spielzeit in Tagen, Stunden, Minuten anzeigen
+- **Permission System**: Eigene Spielzeit sichtbar, andere Spielzeiten mit Permission
+
+### Commands
+
+#### `/playtime`
+- Zeige deine eigene Spielzeit an
+- Beispiel: `/playtime`
+- Require: `ruinscore.command.playtime`
+
+#### `/playtime <Spieler>` (Admin)
+- Zeige die Spielzeit eines anderen Spielers
+- Beispiel: `/playtime Alice`
+- Require: `ruinscore.command.playtime.other`
+
+### Format
+
+Die Spielzeit wird so angezeigt:
+- **Mit vielen Tagen**: `5 Tage, 12 Stunden, 30 Minuten`
+- **Mit Stunden**: `15 Stunden, 45 Minuten`
+- **Mit Minuten**: `45 Minuten, 30 Sekunden`
+- **Nur Sekunden**: `120 Sekunden`
+
+### Implementierung
+
+- `PlaytimeService` - Core-Logik (Tracking, Speicherung, Formatierung)
+- `PlaytimeListener` - Event-Handler für Login/Quit
+- Command: `PlaytimeCommand`
+- Datenbank-Tabelle: `player_playtime`
+
+### Datenbank
+
+**Tabelle: `player_playtime`**
+- `player_uuid` - UUID des Spielers (Primary Key)
+- `playtime_millis` - Gesamte Spielzeit in Millisekunden
+
+## Welcome System
+
+Das Welcome System begrüßt neue Spieler mit einer detaillierten Welcome Message:
+
+### Features
+
+- **Automatische Erkennung**: Neue Spieler werden automatisch erkannt
+- **Schöne Willkommens-Nachricht**: Eine formatierte Nachricht mit Tipps
+- **Server-Broadcast**: Alle Spieler werden über den neuen Spieler benachrichtigt
+- **Persistente Speicherung**: Neue Spieler werden in der DB markiert
+- **Nur einmal pro Spieler**: Die Welcome Message wird nur beim ersten Login gezeigt
+
+### Willkommens-Nachricht
+
+Die Welcome Message zeigt:
+- Große Willkommens-ASCII-Box
+- Personalisierte Begrüßung mit Spielernamen
+- Wichtige Commands (`.job`, `/money`, `/playtime`, `/help`)
+- Informationen über Berufe
+- Info über die Wirtschaft und Auktionen
+- Wie man Hilfe bekommt
+
+### Broadcast
+
+Alle Online-Spieler sehen:
+```
+✨ Alice hat den Server zum ersten Mal betreten! Willkommen! 🎉 ✨
+```
+
+### Implementierung
+
+- `WelcomeService` - Verwaltung von Welcome Messages
+- `WelcomeListener` - Listener für PlayerJoinEvent
+- Datenbank-Tabelle: `player_welcome`
+
+### Datenbank
+
+**Tabelle: `player_welcome`**
+- `player_uuid` - UUID des Spielers (Primary Key)
+- `player_name` - Name des Spielers
+- `first_join` - Timestamp des ersten Logins
 
 ## Marry System
 
@@ -737,6 +827,8 @@ Beim Start werden automatisch erstellt:
 - `auctions` - Speichert alle aktiven Auktionen
 - `player_marriages` - Speichert verheiratete Spieler-Paare
 - `player_marriages_names` - Speichert Partner-Namen für Offline-Anzeige
+- `player_playtime` - Speichert die Spielzeit jedes Spielers
+- `player_welcome` - Speichert welche Spieler bereits begrüßt wurden
 
 ## Vanish System
 

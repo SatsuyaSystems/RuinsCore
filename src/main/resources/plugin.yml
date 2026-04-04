@@ -103,3 +103,9 @@ permissions:
   ruinscore.command.marry:
     description: Erlaubt den /marry Command zur Verheiratung von Spielern.
     default: op
+  ruinscore.command.playtime:
+    description: Erlaubt den /playtime Command.
+    default: true
+  ruinscore.command.playtime.other:
+    description: Erlaubt die Spielzeit von anderen Spielern zu sehen.
+    default: op

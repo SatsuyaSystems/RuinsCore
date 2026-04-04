@@ -15,6 +15,7 @@ import de.satsuya.ruinsCore.core.jobs.JobHealthService;
 import de.satsuya.ruinsCore.core.jobs.JobPrefixService;
 import de.satsuya.ruinsCore.core.jobs.JobService;
 import de.satsuya.ruinsCore.core.marry.MarryService;
+import de.satsuya.ruinsCore.core.playtime.PlaytimeService;
 import de.satsuya.ruinsCore.core.scoreboard.ScoreboardService;
 import de.satsuya.ruinsCore.core.size.SizeService;
 import de.satsuya.ruinsCore.core.support.SupportModeService;
@@ -28,6 +29,9 @@ import de.satsuya.ruinsCore.core.module.impl.EventModule;
 import de.satsuya.ruinsCore.core.permission.PermissionManager;
 import de.satsuya.ruinsCore.core.util.LoggerUtil;
 import de.satsuya.ruinsCore.core.util.StaffAlertUtil;
+import de.satsuya.ruinsCore.core.welcome.WelcomeService;
+import de.satsuya.ruinsCore.listeners.playtime.PlaytimeListener;
+import de.satsuya.ruinsCore.listeners.welcome.WelcomeListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class RuinsCore extends JavaPlugin {
@@ -53,9 +57,11 @@ public final class RuinsCore extends JavaPlugin {
     private WarningService warningService;
     private SizeService sizeService;
     private MarryService marryService;
+    private PlaytimeService playtimeService;
     private ScoreboardService scoreboardService;
     private AuctionService auctionService;
     private AuctionGuiService auctionGuiService;
+    private WelcomeService welcomeService;
     private ModuleManager moduleManager;
 
     @Override
@@ -83,10 +89,12 @@ public final class RuinsCore extends JavaPlugin {
         this.warningService = new WarningService(databaseManager, loggerUtil);
         this.sizeService = new SizeService(databaseManager, loggerUtil);
         this.marryService = new MarryService(databaseManager, loggerUtil);
+        this.playtimeService = new PlaytimeService(databaseManager, loggerUtil);
         this.scoreboardService = new ScoreboardService(this, jobService, economyService);
         this.scoreboardService.setMarryService(marryService);
         this.auctionService = new AuctionService(databaseManager, loggerUtil);
         this.auctionGuiService = new AuctionGuiService(auctionService);
+        this.welcomeService = new WelcomeService(databaseManager, loggerUtil);
         this.moduleManager = new ModuleManager(loggerUtil);
 
         String commandPackage = getConfig().getString("loader.command-package", "de.satsuya.ruinsCore.commands");
@@ -99,6 +107,10 @@ public final class RuinsCore extends JavaPlugin {
         moduleManager.enableAll();
         jobHealthService.syncAllOnline();
         
+        // Registriere Listener manuell
+        getServer().getPluginManager().registerEvents(new PlaytimeListener(playtimeService), this);
+        getServer().getPluginManager().registerEvents(new WelcomeListener(welcomeService), this);
+
         // Starte Scoreboard-Update-Task (alle 10 Ticks = 0.5 Sekunden)
         new de.satsuya.ruinsCore.core.scoreboard.ScoreboardUpdateTask(scoreboardService).runTaskTimer(this, 0L, 10L);
         
@@ -230,5 +242,13 @@ public final class RuinsCore extends JavaPlugin {
 
     public MarryService getMarryService() {
         return marryService;
+    }
+
+    public PlaytimeService getPlaytimeService() {
+        return playtimeService;
+    }
+
+    public WelcomeService getWelcomeService() {
+        return welcomeService;
     }
 }

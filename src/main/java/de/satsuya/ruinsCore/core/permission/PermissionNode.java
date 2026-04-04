@@ -33,7 +33,9 @@ public enum PermissionNode {
     AUCTION_USE("ruinscore.auction.use"),
     STAFF_ALERTS_SEND("ruinscore.staff.alert.send"),
     STAFF_ALERTS_RECEIVE("ruinscore.staff.alert.receive"),
-    MARRY("ruinscore.command.marry");
+    MARRY("ruinscore.command.marry"),
+    COMMAND_PLAYTIME("ruinscore.command.playtime"),
+    COMMAND_PLAYTIME_OTHER("ruinscore.command.playtime.other");
 
     private final String node;
 

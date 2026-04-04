@@ -29,7 +29,7 @@ public final class LoggerUtil {
     }
 
     private String prefix(String message) {
-        return "[RuinsCore] " + message;
+        return "[SYSTEM] " + message;
     }
 }
 

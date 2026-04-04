@@ -130,6 +130,21 @@ public final class DatabaseManager {
                     player_name TEXT NOT NULL
                 )
                 """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_playtime (
+                    player_uuid TEXT PRIMARY KEY,
+                    playtime_millis LONG NOT NULL DEFAULT 0
+                )
+                """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_welcome (
+                    player_uuid TEXT PRIMARY KEY,
+                    player_name TEXT NOT NULL,
+                    first_join LONG NOT NULL
+                )
+                """);
     }
 
     public boolean isConnected() {
