@@ -25,7 +25,7 @@ public final class JobPrefixListener implements Listener {
         // Verzögere die Aktualisierung um sicherzustellen, dass Scoreboard bereits erstellt wurde
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
             jobPrefixService.updatePlayerPrefix(event.getPlayer());
-        }, 1L);
+        }, 10L);
     }
 }
 

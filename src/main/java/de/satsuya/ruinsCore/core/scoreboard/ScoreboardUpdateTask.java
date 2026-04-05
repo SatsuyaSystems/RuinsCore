@@ -19,4 +19,3 @@ public final class ScoreboardUpdateTask extends BukkitRunnable {
         scoreboardService.updateAllScoreboards();
     }
 }
-

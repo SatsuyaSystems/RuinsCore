@@ -18,8 +18,8 @@ alerts:
 jobs:
   holzfaeller:
     restrictions:
-      paralysis-ticks: 80
-      plank-drop-chance: 0.35
+      paralysis-ticks: 20
+      plank-drop-chance: 1
   bauer:
     restrictions:
       deny-plant-message: "§cNur Bauer dürfen Nahrungspflanzen anbauen."
