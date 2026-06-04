@@ -126,9 +126,9 @@ public final class ScoreboardService {
 
         // Header mit Lila-Pink Gradient
         Component header = Component.text(
-            "§5§l═══════════════════════════════════\n" +
-            "§dWillkommen auf §5RuinsCore §dServer\n" +
-            "§5§l═══════════════════════════════════",
+            "────────────────────────────────────────\n" +
+            "§dWillkommen auf Ruins-network.de <3\n" +
+            "────────────────────────────────────────\n",
             NamedTextColor.LIGHT_PURPLE
         );
         
