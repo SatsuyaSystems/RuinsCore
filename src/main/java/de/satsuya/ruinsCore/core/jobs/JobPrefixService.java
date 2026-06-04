@@ -1,10 +1,12 @@
 package de.satsuya.ruinsCore.core.jobs;
 
+import de.satsuya.ruinsCore.core.classes.RuinClassService;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 /**
  * Service zur Verwaltung von Job-Prefixen und Suffixen
@@ -12,9 +14,13 @@ import org.bukkit.scoreboard.Team;
 public final class JobPrefixService {
 
     private final JobService jobService;
+    private final ScoreboardManager scoreboardManager;
+    private final RuinClassService classService;
 
-    public JobPrefixService(JobService jobService) {
+    public JobPrefixService(JobService jobService, ScoreboardManager scoreboardManager, RuinClassService classService) {
         this.jobService = jobService;
+        this.scoreboardManager = scoreboardManager;
+        this.classService = classService;
     }
 
     /**
@@ -76,7 +82,20 @@ public final class JobPrefixService {
         Component tabName = Component.empty()
             .append(jobColor.getDisplayComponent())
             .append(Component.text(" " + player.getName(), net.kyori.adventure.text.format.NamedTextColor.WHITE));
+
+        String suffix = "";
+        if (classService.isBaptized(player.getUniqueId())) {
+            suffix = " §f✟";
+            tabName = tabName.append(Component.text(suffix, net.kyori.adventure.text.format.NamedTextColor.WHITE));
+        }
+
         player.playerListName(tabName);
+
+        String prefix = "§" + jobColor.getColorCode() + jobColor.getDisplayName().substring(1);
+        String displayName = prefix + " §a" + player.getName();
+
+        player.setDisplayName(displayName);
+        // Nametag wird bereits über Scoreboard-Teams gesetzt (kein ProtocolLib/NametagService mehr).
     }
 
     /**
@@ -99,7 +118,3 @@ public final class JobPrefixService {
         player.playerListName(null);
     }
 }
-
-
-
-

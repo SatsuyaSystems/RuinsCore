@@ -121,3 +121,12 @@ permissions:
   ruinscore.command.report.view:
     description: Erlaubt das Report-GUI für Supporter.
     default: op
+  ruinscore.command.klasse:
+    description: Erlaubt den /klasse Command.
+    default: op
+  ruinscore.command.taufe:
+    description: Erlaubt den /taufe Command.
+    default: op
+  ruinscore.command.ghost:
+    description: Erlaubt den /ghost Command für Waldgeister.
+    default: true

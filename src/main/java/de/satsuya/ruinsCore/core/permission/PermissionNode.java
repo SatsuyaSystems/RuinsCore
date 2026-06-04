@@ -39,7 +39,12 @@ public enum PermissionNode {
     COMMAND_PENTAGRAM("ruinscore.command.pentagram"),
     COMMAND_TURLOCK_ADMIN("ruinscore.command.turlock.admin"),
     REPORT_USE("ruinscore.command.report.use"),
-    REPORT_VIEW("ruinscore.command.report.view");
+    REPORT_VIEW("ruinscore.command.report.view"),
+    COMMAND_WARNING_DELETE("ruinscore.command.warning.delete"),
+    COMMAND_WARNINGS_SEE("ruinscore.command.warnings.see"),
+    COMMAND_KLASSE("ruinscore.command.klasse"),
+    COMMAND_TAUFE("ruinscore.command.taufe"),
+    COMMAND_GHOST("ruinscore.command.ghost");
 
     private final String node;
 
@@ -51,4 +56,3 @@ public enum PermissionNode {
         return node;
     }
 }
-

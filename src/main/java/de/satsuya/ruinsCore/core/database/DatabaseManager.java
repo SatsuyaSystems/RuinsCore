@@ -162,25 +162,34 @@ public final class DatabaseManager {
 
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS door_lock_whitelist (
-                    door_key TEXT NOT NULL,
+                    location_id TEXT NOT NULL,
                     player_uuid TEXT NOT NULL,
-                    player_name TEXT NOT NULL,
-                    PRIMARY KEY (door_key, player_uuid)
-                )
-                """);
+                    PRIMARY KEY (location_id, player_uuid)
+                );
+            """);
 
         executeUpdate("""
                 CREATE TABLE IF NOT EXISTS reports (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     reporter_uuid TEXT NOT NULL,
-                    reporter_name TEXT NOT NULL,
-                    reported_uuid TEXT NOT NULL,
-                    reported_name TEXT NOT NULL,
+                    target_uuid TEXT NOT NULL,
                     reason TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    status TEXT NOT NULL DEFAULT 'OPEN'
-                )
-                """);
+                    timestamp INTEGER NOT NULL
+                );
+            """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS player_classes (
+                    player_uuid TEXT PRIMARY KEY,
+                    class_type TEXT NOT NULL
+                );
+            """);
+
+        executeUpdate("""
+                CREATE TABLE IF NOT EXISTS baptized_players (
+                    player_uuid TEXT PRIMARY KEY
+                );
+            """);
     }
 
     public boolean isConnected() {

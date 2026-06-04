@@ -1,5 +1,7 @@
 package de.satsuya.ruinsCore.core.jobs;
 
+import de.satsuya.ruinsCore.core.classes.RuinClassService;
+import de.satsuya.ruinsCore.core.classes.RuinClassType;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -15,10 +17,12 @@ public final class JobHealthService {
     private static final double DEFAULT_MAX_HEALTH = 20.0D;
 
     private final JobService jobService;
+    private final RuinClassService classService;
     private final Map<JobType, Double> healthBonuses;
 
-    public JobHealthService(JobService jobService) {
+    public JobHealthService(JobService jobService, RuinClassService classService) {
         this.jobService = jobService;
+        this.classService = classService;
         this.healthBonuses = new EnumMap<>(JobType.class);
 
         healthBonuses.put(JobType.LEUTNANT, 14.0D); // 7 extra Herzen
@@ -31,6 +35,11 @@ public final class JobHealthService {
     public void sync(Player player) {
         Optional<JobType> currentJob = jobService.getJob(player.getUniqueId());
         double bonus = currentJob.map(jobType -> healthBonuses.getOrDefault(jobType, 0.0D)).orElse(0.0D);
+
+        Optional<RuinClassType> currentClass = classService.getClass(player.getUniqueId());
+        if (currentClass.isPresent() && currentClass.get() == RuinClassType.ORK) {
+            bonus += 4.0D; // 2 Extra hearts for Ork
+        }
 
         AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
         if (maxHealth == null) {
